@@ -1,88 +1,87 @@
-import React from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "react-toastify";
-import { useNavigate, Link, useLocation } from "react-router-dom";
-import axios from "axios";
+import React, { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth } from "../firebase/firebase.config";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { toast } from "react-toastify";
+import { useAuth } from "../context/AuthProvider";
 
 export default function Login() {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm();
-
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const navigate = useNavigate();
-  const location = useLocation();
-  const from = location.state?.from?.pathname || "/";
+  const { setUser } = useAuth();
 
-  const onSubmit = async (data) => {
+  const handleEmailLogin = async (e) => {
+    e.preventDefault();
     try {
-      const { email, password } = data;
-
-      // Firebase login
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-
-      // Optional: send token to server or store in cookie/localStorage
-      const idToken = await user.getIdToken();
-      document.cookie = `token=${idToken}; path=/;`;
-
+      const res = await signInWithEmailAndPassword(auth, email, password);
+      const loggedUser = res.user;
+      setUser({ email: loggedUser.email, name: loggedUser.displayName, photoURL: loggedUser.photoURL, role: "borrower" }); // default role for demo
       toast.success("Login successful!");
-
-      // Redirect
-      navigate(from, { replace: true });
+      navigate("/dashboard/my-loans");
     } catch (err) {
       console.error(err);
-      toast.error(err?.message || "Login failed");
+      toast.error("Invalid email or password");
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    const provider = new GoogleAuthProvider();
+    try {
+      const res = await signInWithPopup(auth, provider);
+      const loggedUser = res.user;
+      setUser({ email: loggedUser.email, name: loggedUser.displayName, photoURL: loggedUser.photoURL, role: "borrower" });
+      toast.success("Login successful via Google!");
+      navigate("/dashboard/my-loans");
+    } catch (err) {
+      console.error(err);
+      toast.error("Google login failed");
     }
   };
 
   return (
-    <div className="max-w-md mx-auto mt-12 p-6 bg-white rounded-lg shadow">
-      <h2 className="text-2xl font-semibold mb-4 text-center">Login to your account</h2>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        {/* Email */}
-        <div>
-          <label className="block text-sm font-medium">Email</label>
-          <input
-            {...register("email", {
-              required: "Email is required",
-              pattern: { value: /^\S+@\S+$/i, message: "Invalid email address" },
-            })}
-            className="input input-bordered w-full mt-1"
-            placeholder="you@example.com"
-          />
-          {errors.email && <p className="text-xs text-red-500 mt-1">{errors.email.message}</p>}
-        </div>
-
-        {/* Password */}
-        <div>
-          <label className="block text-sm font-medium">Password</label>
-          <input
-            type="password"
-            {...register("password", { required: "Password is required" })}
-            className="input input-bordered w-full mt-1"
-            placeholder="Your password"
-          />
-          {errors.password && <p className="text-xs text-red-500 mt-1">{errors.password.message}</p>}
-        </div>
-
-        <div className="flex items-center justify-between">
-          <button
-            type="submit"
-            className={`btn btn-primary ${isSubmitting ? "loading" : ""}`}
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? "Logging in..." : "Login"}
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="w-full max-w-md bg-white p-8 rounded-lg shadow">
+        <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
+        <form onSubmit={handleEmailLogin} className="space-y-4">
+          <div>
+            <label className="block mb-1">Email</label>
+            <input
+              type="email"
+              className="input input-bordered w-full"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          <div>
+            <label className="block mb-1">Password</label>
+            <input
+              type="password"
+              className="input input-bordered w-full"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+          <button type="submit" className="btn btn-primary w-full">
+            Login
           </button>
+        </form>
 
-          <Link to="/register" className="text-sm link">
-            Don't have an account?
+        <div className="divider">OR</div>
+
+        <button onClick={handleGoogleLogin} className="btn btn-outline w-full mb-4">
+          Login with Google
+        </button>
+
+        <p className="text-center">
+          Don't have an account?{" "}
+          <Link to="/register" className="text-blue-500 hover:underline">
+            Register
           </Link>
-        </div>
-      </form>
+        </p>
+      </div>
     </div>
   );
 }

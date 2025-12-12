@@ -1,9 +1,11 @@
 import { Link, NavLink } from "react-router-dom";
 import { useState } from "react";
 import { CiSun, CiDark } from "react-icons/ci";
+// import { useTheme } from "../context/ThemeProvider";
 
 export default function Navbar() {
   const [theme, setTheme] = useState("light");
+  
 
   const toggleTheme = () => {
     const newTheme = theme === "light" ? "dark" : "light";
@@ -19,6 +21,8 @@ export default function Navbar() {
       <li><NavLink to="/register">Register</NavLink></li>
     </>
   );
+
+  
 
   return (
     <div className="navbar bg-base-100 shadow-md px-4 sticky top-0 z-50">
