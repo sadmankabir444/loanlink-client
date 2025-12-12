@@ -5,7 +5,14 @@ import { toast } from "react-toastify";
 export default function ManageUsers() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
+  // Suspend Modal State
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [suspendReason, setSuspendReason] = useState("");
 
   const fetchUsers = async () => {
     try {
@@ -23,50 +30,33 @@ export default function ManageUsers() {
     fetchUsers();
   }, []);
 
-  const handleRoleChange = async (userId, role) => {
-    try {
-      await axios.patch(`http://localhost:3000/users/${userId}`, { role });
-      toast.success("User role updated!");
-      fetchUsers();
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to update role");
-    }
-  };
-
-  const handleSuspend = async (userId) => {
-    const reason = prompt("Enter suspend reason:");
-    if (!reason) return;
-    try {
-      await axios.patch(`http://localhost:3000/users/${userId}`, { suspended: true, suspendReason: reason });
-      toast.success("User suspended!");
-      fetchUsers();
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to suspend user");
-    }
-  };
-
+  // Filtered and paginated users
   const filteredUsers = users.filter(
-    (user) => user.name?.toLowerCase().includes(search.toLowerCase()) || user.email.toLowerCase().includes(search.toLowerCase())
+    (user) =>
+      user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  const lastIndex = currentPage * itemsPerPage;
+  const firstIndex = lastIndex - itemsPerPage;
+  const currentItems = filteredUsers.slice(firstIndex, lastIndex);
+  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
 
-  if (!users.length) return <div className="min-h-screen flex items-center justify-center">No users found</div>;
+  if (loading) return <div>Loading...</div>;
 
   return (
-    <div className="max-w-6xl mx-auto mt-8 px-4">
-      <h2 className="text-3xl font-semibold mb-6">Manage Users</h2>
+    <div className="p-4">
+      <h2 className="text-2xl font-bold mb-4">Manage Users</h2>
 
+      {/* Search Input */}
       <input
         type="text"
         placeholder="Search by name or email"
         className="input input-bordered w-full mb-4"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
+        onChange={(e) => setSearchTerm(e.target.value)}
       />
 
+      {/* Users Table */}
       <div className="overflow-x-auto">
         <table className="table w-full">
           <thead>
@@ -74,35 +64,25 @@ export default function ManageUsers() {
               <th>Name</th>
               <th>Email</th>
               <th>Role</th>
-              <th>Suspended</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {filteredUsers.map((user) => (
+            {currentItems.map((user) => (
               <tr key={user._id}>
                 <td>{user.name}</td>
                 <td>{user.email}</td>
+                <td>{user.role}</td>
                 <td>
-                  <select
-                    value={user.role}
-                    onChange={(e) => handleRoleChange(user._id, e.target.value)}
-                    className="select select-bordered select-sm"
+                  {/* Suspend Button */}
+                  <button
+                    className="btn btn-error btn-sm"
+                    onClick={() => {
+                      setSelectedUser(user);
+                      setModalOpen(true);
+                    }}
                   >
-                    <option value="borrower">Borrower</option>
-                    <option value="manager">Manager</option>
-                    <option value="admin">Admin</option>
-                  </select>
-                </td>
-                <td>{user.suspended ? "Yes" : "No"}</td>
-                <td className="space-x-2">
-                  {!user.suspended && (
-                    <button className="btn btn-sm btn-error" onClick={() => handleSuspend(user._id)}>
-                      Suspend
-                    </button>
-                  )}
-                  <button className="btn btn-sm btn-info" onClick={() => alert(JSON.stringify(user, null, 2))}>
-                    View
+                    Suspend
                   </button>
                 </td>
               </tr>
@@ -110,6 +90,59 @@ export default function ManageUsers() {
           </tbody>
         </table>
       </div>
+
+      {/* Pagination Buttons */}
+      <div className="btn-group mt-4">
+        {Array.from({ length: totalPages }, (_, i) => (
+          <button
+            key={i}
+            className={`btn btn-sm ${currentPage === i + 1 ? "btn-primary" : "btn-outline"}`}
+            onClick={() => setCurrentPage(i + 1)}
+          >
+            {i + 1}
+          </button>
+        ))}
+      </div>
+
+      {/* Suspend Modal */}
+      {modalOpen && (
+        <div className="modal modal-open">
+          <div className="modal-box">
+            <h3 className="font-bold text-lg">Suspend User</h3>
+            <textarea
+              className="textarea w-full mt-2"
+              placeholder="Reason for suspension"
+              value={suspendReason}
+              onChange={(e) => setSuspendReason(e.target.value)}
+            />
+            <div className="modal-action">
+              <button
+                className="btn btn-primary"
+                onClick={async () => {
+                  try {
+                    await axios.patch(`http://localhost:3000/users/${selectedUser._id}`, {
+                      suspended: true,
+                      reason: suspendReason,
+                    });
+                    toast.success("User suspended successfully");
+                    setModalOpen(false);
+                    setSuspendReason("");
+                    fetchUsers();
+                  } catch (err) {
+                    console.error(err);
+                    toast.error("Failed to suspend user");
+                  }
+                }}
+              >
+                Submit
+              </button>
+              <button className="btn btn-outline" onClick={() => setModalOpen(false)}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

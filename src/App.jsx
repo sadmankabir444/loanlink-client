@@ -3,7 +3,7 @@ import React from "react";
 import { Routes, Route } from "react-router-dom";
 
 // Public Layout & Pages
-import MainLayout from "./layout/MainLayout";
+import MainLayout from "./layouts/MainLayout";
 import Home from "./pages/Home";
 import AllLoans from "./pages/AllLoans";
 import LoanDetails from "./pages/LoanDetails";
