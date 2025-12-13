@@ -9,15 +9,22 @@ const ApplyLoan = () => {
   const navigate = useNavigate();
 
   const [loan, setLoan] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
 
+  // Fetch loan details
   useEffect(() => {
-    fetch(`http://localhost:5000/loans/${id}`)
+    fetch(`http://localhost:3000/loans/${id}`)
       .then(res => res.json())
-      .then(data => setLoan(data));
+      .then(data => setLoan(data))
+      .catch(err => toast.error("Failed to fetch loan details"));
   }, [id]);
 
-  const handleSubmit = e => {
+  // Handle form submission
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!loan) return;
+
+    setSubmitting(true);
     const form = e.target;
 
     const application = {
@@ -40,29 +47,36 @@ const ApplyLoan = () => {
       createdAt: new Date(),
     };
 
-    fetch("http://localhost:5000/loan-applications", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify(application),
-    })
-      .then(res => res.json())
-      .then(() => {
-        toast.success("Loan Application Submitted!");
-        navigate("/dashboard/my-loans");
+    try {
+      const res = await fetch("http://localhost:3000/loan-applications", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(application),
       });
+      if (!res.ok) throw new Error("Submission failed");
+
+      toast.success("Loan Application Submitted!");
+      navigate("/dashboard/my-loans");
+    } catch (err) {
+      toast.error(err.message || "Failed to submit application");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  if (!loan) return <div className="text-center mt-20">Loading...</div>;
+  if (!loan) return <div className="text-center mt-20"><span className="loading loading-spinner loading-lg"></span></div>;
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-16">
       <h2 className="text-2xl font-bold mb-6">Apply for {loan.title}</h2>
 
       <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-4">
-        <input readOnly value={user.email} className="input input-bordered" />
-        <input readOnly value={loan.title} className="input input-bordered" />
-        <input readOnly value={`${loan.interest}%`} className="input input-bordered" />
+        {/* Auto-filled fields */}
+        <input readOnly value={user.email} className="input input-bordered bg-gray-100 dark:bg-gray-700" />
+        <input readOnly value={loan.title} className="input input-bordered bg-gray-100 dark:bg-gray-700" />
+        <input readOnly value={`${loan.interest}%`} className="input input-bordered bg-gray-100 dark:bg-gray-700" />
 
+        {/* User input fields */}
         <input name="firstName" placeholder="First Name" className="input input-bordered" required />
         <input name="lastName" placeholder="Last Name" className="input input-bordered" required />
         <input name="phone" placeholder="Contact Number" className="input input-bordered" required />
@@ -71,12 +85,18 @@ const ApplyLoan = () => {
         <input name="monthlyIncome" placeholder="Monthly Income" className="input input-bordered" required />
         <input name="loanAmount" placeholder="Loan Amount" className="input input-bordered" required />
 
-        <textarea name="reason" placeholder="Reason for Loan" className="textarea textarea-bordered md:col-span-2" />
-        <textarea name="address" placeholder="Address" className="textarea textarea-bordered md:col-span-2" />
+        <textarea name="reason" placeholder="Reason for Loan" className="textarea textarea-bordered md:col-span-2" required />
+        <textarea name="address" placeholder="Address" className="textarea textarea-bordered md:col-span-2" required />
         <textarea name="notes" placeholder="Extra Notes" className="textarea textarea-bordered md:col-span-2" />
 
-        <button className="btn btn-primary md:col-span-2">
-          Submit Application
+        {/* Submit button with spinner */}
+        <button
+          type="submit"
+          disabled={submitting}
+          className={`btn btn-primary md:col-span-2 flex justify-center items-center gap-2 ${submitting ? "opacity-70 cursor-not-allowed" : ""}`}
+        >
+          {submitting && <span className="loading loading-spinner loading-sm"></span>}
+          {submitting ? "Submitting..." : "Submit Application"}
         </button>
       </form>
     </div>

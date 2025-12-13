@@ -18,8 +18,8 @@ const LoanDetails = () => {
     setPageLoading(true);
 
     Promise.all([
-      fetch(`http://localhost:5000/loans/${id}`).then(res => res.json()),
-      fetch(`http://localhost:5000/users/${user.email}`).then(res => res.json())
+      fetch(`http://localhost:3000/loans/${id}`).then(res => res.json()),
+      fetch(`http://localhost:3000/users/${user.email}`).then(res => res.json())
     ])
       .then(([loanData, userData]) => {
         setLoan(loanData);
@@ -28,7 +28,7 @@ const LoanDetails = () => {
       .finally(() => setPageLoading(false));
   }, [id, user]);
 
-  /* ================= LOADING ================= */
+  // ================= LOADING =================
   if (loading || pageLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -37,8 +37,8 @@ const LoanDetails = () => {
     );
   }
 
-  /* ================= NOT FOUND ================= */
-  if (!loan) {
+  // ================= NOT FOUND =================
+  if (!loan?._id) {
     return (
       <div className="text-center mt-24">
         <h2 className="text-2xl font-bold">Loan not found</h2>
@@ -71,9 +71,7 @@ const LoanDetails = () => {
         {/* ================= DETAILS ================= */}
         <div className="space-y-6">
           <div>
-            <h1 className="text-3xl md:text-4xl font-bold mb-2">
-              {loan.title}
-            </h1>
+            <h1 className="text-3xl md:text-4xl font-bold mb-2">{loan.title}</h1>
             <p className="opacity-80">{loan.description}</p>
           </div>
 
@@ -95,9 +93,7 @@ const LoanDetails = () => {
 
             <div>
               <p className="text-sm opacity-70">EMI Plans</p>
-              <p className="font-semibold">
-                {loan.emiPlans?.join(", ")} months
-              </p>
+              <p className="font-semibold">{loan.emiPlans?.join(", ")} months</p>
             </div>
           </div>
 
@@ -106,9 +102,7 @@ const LoanDetails = () => {
             <button
               disabled={!canApply}
               onClick={() => navigate(`/apply-loan/${loan._id}`)}
-              className={`btn w-full ${
-                canApply ? "btn-primary" : "btn-disabled"
-              }`}
+              className={`btn w-full ${canApply ? "btn-primary" : "btn-disabled"}`}
             >
               Apply for this Loan
             </button>
@@ -122,8 +116,7 @@ const LoanDetails = () => {
 
           {/* ================= INFO NOTE ================= */}
           <div className="bg-base-100 border border-base-300 p-4 rounded-lg text-sm opacity-80">
-            ⚠ Please review loan terms carefully before applying. Once submitted,
-            applications are reviewed by the loan manager.
+            ⚠ Please review loan terms carefully before applying. Once submitted, applications are reviewed by the loan manager.
           </div>
         </div>
       </motion.div>
