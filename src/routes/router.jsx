@@ -4,6 +4,9 @@ import Home from "../pages/Home";
 import AllLoans from "../pages/AllLoans";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
+import LoanDetails from "../pages/LoanDetails";
+import PrivateRoute from "../components/PrivateRoute";
+import ApplyLoan from "../pages/ApplyLoan";
 
 const router = createBrowserRouter([
   {
@@ -14,6 +17,22 @@ const router = createBrowserRouter([
       { path: "/loans", element: <AllLoans /> },
       { path: "/login", element: <Login /> },
       { path: "/register", element: <Register /> },
+      {
+        path: "/loan/:id",
+        element: (
+          <PrivateRoute>
+            <LoanDetails />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "/apply-loan/:id",
+        element: (
+          <PrivateRoute>
+            <ApplyLoan />
+          </PrivateRoute>
+        ),
+      },
     ],
   },
 ]);

@@ -1,117 +1,64 @@
-import React, { useState } from "react";
-import axios from "axios";
-import { toast } from "react-toastify";
-import Confetti from "react-confetti";
-import { useWindowSize } from "react-use";
+import { useContext, useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { AuthContext } from "../context/AuthProvider";
 
-export default function LoanDetails() {
-  const { width, height } = useWindowSize();
-  const [showConfetti, setShowConfetti] = useState(false);
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    contactNumber: "",
-    nationalId: "",
-    incomeSource: "",
-    monthlyIncome: "",
-    loanAmount: "",
-    reason: "",
-  });
+const LoanDetails = () => {
+  const { id } = useParams();
+  const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  const [loan, setLoan] = useState(null);
+  const [role, setRole] = useState("");
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      await axios.post("http://localhost:3000/loan-applications", formData);
-      toast.success("Loan application submitted!");
-      setShowConfetti(true);
-      setTimeout(() => setShowConfetti(false), 5000);
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to submit application");
-    }
-  };
+  useEffect(() => {
+    fetch(`http://localhost:5000/loans/${id}`)
+      .then(res => res.json())
+      .then(data => setLoan(data));
+
+    fetch(`http://localhost:5000/users/${user?.email}`)
+      .then(res => res.json())
+      .then(data => setRole(data?.role));
+  }, [id, user]);
+
+  if (!loan) {
+    return <div className="text-center mt-20">Loading...</div>;
+  }
+
+  const canApply = role === "borrower";
 
   return (
-    <>
-      {showConfetti && <Confetti width={width} height={height} />}
-      <form onSubmit={handleSubmit} className="p-4 max-w-xl mx-auto">
-        <input
-          type="text"
-          name="firstName"
-          placeholder="First Name"
-          value={formData.firstName}
-          onChange={handleChange}
-          className="input input-bordered w-full mb-2"
-          required
-        />
-        <input
-          type="text"
-          name="lastName"
-          placeholder="Last Name"
-          value={formData.lastName}
-          onChange={handleChange}
-          className="input input-bordered w-full mb-2"
-          required
-        />
-        <input
-          type="text"
-          name="contactNumber"
-          placeholder="Contact Number"
-          value={formData.contactNumber}
-          onChange={handleChange}
-          className="input input-bordered w-full mb-2"
-          required
-        />
-        <input
-          type="text"
-          name="nationalId"
-          placeholder="National ID"
-          value={formData.nationalId}
-          onChange={handleChange}
-          className="input input-bordered w-full mb-2"
-          required
-        />
-        <input
-          type="text"
-          name="incomeSource"
-          placeholder="Income Source"
-          value={formData.incomeSource}
-          onChange={handleChange}
-          className="input input-bordered w-full mb-2"
-          required
-        />
-        <input
-          type="number"
-          name="monthlyIncome"
-          placeholder="Monthly Income"
-          value={formData.monthlyIncome}
-          onChange={handleChange}
-          className="input input-bordered w-full mb-2"
-          required
-        />
-        <input
-          type="number"
-          name="loanAmount"
-          placeholder="Loan Amount"
-          value={formData.loanAmount}
-          onChange={handleChange}
-          className="input input-bordered w-full mb-2"
-          required
-        />
-        <textarea
-          name="reason"
-          placeholder="Reason for Loan"
-          value={formData.reason}
-          onChange={handleChange}
-          className="textarea textarea-bordered w-full mb-2"
-          required
-        ></textarea>
-        <button type="submit" className="btn btn-primary w-full">Apply Now</button>
-      </form>
-    </>
+    <div className="max-w-5xl mx-auto px-4 py-16">
+      <img
+        src={loan.image}
+        alt={loan.title}
+        className="w-full h-80 object-cover rounded-lg"
+      />
+
+      <div className="mt-6 space-y-3">
+        <h2 className="text-3xl font-bold">{loan.title}</h2>
+        <p>{loan.description}</p>
+
+        <p><strong>Category:</strong> {loan.category}</p>
+        <p><strong>Interest Rate:</strong> {loan.interest}%</p>
+        <p><strong>Max Limit:</strong> ৳{loan.maxAmount}</p>
+        <p><strong>EMI Plans:</strong> {loan.emiPlans.join(", ")} months</p>
+
+        <button
+          disabled={!canApply}
+          onClick={() => navigate(`/apply-loan/${loan._id}`)}
+          className={`btn mt-6 ${canApply ? "btn-primary" : "btn-disabled"}`}
+        >
+          Apply Now
+        </button>
+
+        {!canApply && (
+          <p className="text-red-500 text-sm">
+            Only borrowers can apply for loans.
+          </p>
+        )}
+      </div>
+    </div>
   );
-}
+};
+
+export default LoanDetails;
