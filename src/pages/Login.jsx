@@ -1,72 +1,69 @@
 import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
 import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth } from "../firebase/firebase.config";
-import { toast } from "react-toastify";
-import { useAuth } from "../context/AuthProvider";
+import { useNavigate, Link } from "react-router-dom";
+import { toast } from "react-hot-toast";
 
-export default function Login() {
+const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
-  const { setUser } = useAuth();
 
+  // Email/Password login
   const handleEmailLogin = async (e) => {
     e.preventDefault();
     try {
-      const res = await signInWithEmailAndPassword(auth, email, password);
-      const loggedUser = res.user;
-      setUser({ email: loggedUser.email, name: loggedUser.displayName, photoURL: loggedUser.photoURL, role: "borrower" }); // default role for demo
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
       toast.success("Login successful!");
-      navigate("/dashboard/my-loans");
-    } catch (err) {
-      console.error(err);
-      toast.error("Invalid email or password");
+      navigate("/dashboard"); // redirect after login
+    } catch (error) {
+      console.error(error);
+      toast.error(error.message || "Login failed");
     }
   };
 
+  // Google login
   const handleGoogleLogin = async () => {
-    const provider = new GoogleAuthProvider();
     try {
-      const res = await signInWithPopup(auth, provider);
-      const loggedUser = res.user;
-      setUser({ email: loggedUser.email, name: loggedUser.displayName, photoURL: loggedUser.photoURL, role: "borrower" });
-      toast.success("Login successful via Google!");
-      navigate("/dashboard/my-loans");
-    } catch (err) {
-      console.error(err);
-      toast.error("Google login failed");
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      toast.success("Google login successful!");
+      navigate("/dashboard");
+    } catch (error) {
+      console.error(error);
+      toast.error(error.message || "Google login failed");
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="w-full max-w-md bg-white p-8 rounded-lg shadow">
-        <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-800">
+      <div className="bg-white dark:bg-gray-900 p-8 rounded-lg shadow-md w-full max-w-md">
+        <h2 className="text-2xl font-bold mb-6 text-center text-gray-800 dark:text-gray-100">Login</h2>
+
         <form onSubmit={handleEmailLogin} className="space-y-4">
           <div>
-            <label className="block mb-1">Email</label>
+            <label className="block mb-1 text-gray-700 dark:text-gray-300">Email</label>
             <input
               type="email"
-              className="input input-bordered w-full"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              className="input input-bordered w-full"
             />
           </div>
+
           <div>
-            <label className="block mb-1">Password</label>
+            <label className="block mb-1 text-gray-700 dark:text-gray-300">Password</label>
             <input
               type="password"
-              className="input input-bordered w-full"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              className="input input-bordered w-full"
             />
           </div>
-          <button type="submit" className="btn btn-primary w-full">
-            Login
-          </button>
+
+          <button type="submit" className="btn btn-primary w-full">Login</button>
         </form>
 
         <div className="divider">OR</div>
@@ -75,7 +72,7 @@ export default function Login() {
           Login with Google
         </button>
 
-        <p className="text-center">
+        <p className="text-center text-gray-600 dark:text-gray-400">
           Don't have an account?{" "}
           <Link to="/register" className="text-blue-500 hover:underline">
             Register
@@ -84,4 +81,6 @@ export default function Login() {
       </div>
     </div>
   );
-}
+};
+
+export default Login;

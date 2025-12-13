@@ -1,20 +1,18 @@
-import React from "react";
-import { Navigate, Outlet } from "react-router-dom";
-import { useAuth } from "../context/AuthProvider";
+import { useContext } from "react";
+import { Navigate, useLocation } from "react-router-dom";
+import { AuthContext } from "../context/AuthProvider";
 
-export default function PrivateRoute({ allowedRoles }) {
-  const { user } = useAuth();
+const PrivateRoute = ({ children }) => {
+  const { user, loading } = useContext(AuthContext);
+  const location = useLocation();
+
+  if (loading) return <div className="text-center mt-20">Loading...</div>;
 
   if (!user) {
-    // Not logged in
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  if (allowedRoles && !allowedRoles.includes(user.role)) {
-    // Logged in but not allowed role
-    return <Navigate to="/" replace />;
-  }
+  return children;
+};
 
-  // User is allowed
-  return <Outlet />;
-}
+export default PrivateRoute;
