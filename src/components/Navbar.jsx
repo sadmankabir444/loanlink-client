@@ -1,34 +1,102 @@
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useContext, useState } from "react";
 import { AuthContext } from "../providers/AuthProvider";
 import { CiSun, CiDark } from "react-icons/ci";
+import toast from "react-hot-toast";
 
 const Navbar = () => {
   const { user, logout } = useContext(AuthContext);
-  const [theme, setTheme] = useState("light");
+  const navigate = useNavigate();
+  const [theme, setTheme] = useState(
+    document.documentElement.getAttribute("data-theme") || "light"
+  );
 
+  // Theme toggle
   const toggleTheme = () => {
     const newTheme = theme === "light" ? "dark" : "light";
     setTheme(newTheme);
     document.documentElement.setAttribute("data-theme", newTheme);
   };
 
+  // Logout handler with toast
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast.success("Logged out successfully");
+      navigate("/login");
+    } catch (err) {
+      toast.error("Logout failed");
+    }
+  };
+
+  const activeClass =
+    "text-primary font-semibold border-b-2 border-primary";
+  const normalClass = "hover:text-primary transition";
+
   const navLinks = (
     <>
-      <li><NavLink to="/">Home</NavLink></li>
-      <li><NavLink to="/loans">All Loans</NavLink></li>
+      <li>
+        <NavLink
+          to="/"
+          className={({ isActive }) =>
+            isActive ? activeClass : normalClass
+          }
+        >
+          Home
+        </NavLink>
+      </li>
+
+      <li>
+        <NavLink
+          to="/loans"
+          className={({ isActive }) =>
+            isActive ? activeClass : normalClass
+          }
+        >
+          All Loans
+        </NavLink>
+      </li>
 
       {!user ? (
         <>
-          <li><NavLink to="/login">Login</NavLink></li>
-          <li><NavLink to="/register">Register</NavLink></li>
+          <li>
+            <NavLink
+              to="/login"
+              className={({ isActive }) =>
+                isActive ? activeClass : normalClass
+              }
+            >
+              Login
+            </NavLink>
+          </li>
+
+          <li>
+            <NavLink
+              to="/register"
+              className={({ isActive }) =>
+                isActive ? activeClass : normalClass
+              }
+            >
+              Register
+            </NavLink>
+          </li>
         </>
       ) : (
         <>
-          <li><NavLink to="/dashboard">Dashboard</NavLink></li>
+          <li>
+            <NavLink
+              to="/dashboard"
+              className={({ isActive }) =>
+                isActive ? activeClass : normalClass
+              }
+            >
+              Dashboard
+            </NavLink>
+          </li>
+
           <li>
             <button
-              onClick={logout}
+              onClick={handleLogout}
               className="btn btn-sm btn-error text-white"
             >
               Logout
@@ -40,7 +108,7 @@ const Navbar = () => {
   );
 
   return (
-    <div className="navbar bg-base-100 shadow-md px-4 sticky top-0 z-50">
+    <nav className="navbar bg-base-100 shadow-md px-4 sticky top-0 z-50">
       {/* Left */}
       <div className="navbar-start">
         <Link to="/" className="text-2xl font-bold text-primary">
@@ -50,15 +118,28 @@ const Navbar = () => {
 
       {/* Center (Desktop) */}
       <div className="navbar-center hidden lg:flex">
-        <ul className="menu menu-horizontal px-1 font-medium gap-2">
+        <ul className="menu menu-horizontal px-1 gap-4 font-medium">
           {navLinks}
         </ul>
       </div>
 
       {/* Right */}
       <div className="navbar-end flex items-center gap-3">
+        {/* Profile Image */}
+        {user?.photoURL && (
+          <img
+            src={user.photoURL}
+            alt={user.displayName || "User"}
+            className="w-10 h-10 rounded-full border-2 border-primary object-cover"
+          />
+        )}
+
         {/* Theme Toggle */}
-        <button onClick={toggleTheme} className="btn btn-sm btn-outline">
+        <button
+          onClick={toggleTheme}
+          className="btn btn-sm btn-outline"
+          aria-label="Toggle Theme"
+        >
           {theme === "light" ? <CiDark size={20} /> : <CiSun size={20} />}
         </button>
 
@@ -75,7 +156,7 @@ const Navbar = () => {
           </ul>
         </div>
       </div>
-    </div>
+    </nav>
   );
 };
 
