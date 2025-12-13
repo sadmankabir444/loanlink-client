@@ -1,24 +1,16 @@
-// src/main.jsx
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { BrowserRouter } from "react-router-dom";
-import App from "./App";
+import { RouterProvider } from "react-router-dom";
+import router from "./routes/Router";
+import AuthProvider from "./context/AuthProvider";
+import { Toaster } from "react-hot-toast";
 import "./index.css";
-import { AuthProvider } from "./context/AuthProvider";
-import 'react-toastify/dist/ReactToastify.css';
-import "react-toastify/dist/ReactToastify.css";
-import { ToastContainer } from "react-toastify";
-
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <BrowserRouter>
-      <AuthProvider>
-        <App />
-      </AuthProvider>
-    </BrowserRouter>
+    <AuthProvider>
+      <RouterProvider router={router} />
+      <Toaster position="top-right" />
+    </AuthProvider>
   </React.StrictMode>
-  
 );
-// Toast Container
-<ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />

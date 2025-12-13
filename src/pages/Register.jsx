@@ -1,83 +1,83 @@
-import React, { useState } from "react";
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { auth } from "../firebase/firebase.config";
-import { useNavigate, Link } from "react-router-dom";
-import { toast } from "react-hot-toast";
+import { useContext, useState } from "react";
+import { AuthContext } from "../context/AuthProvider";
+import toast from "react-hot-toast";
+import { Link, useNavigate } from "react-router-dom";
 
 const Register = () => {
-  const [name, setName] = useState("");
-  const [photoURL, setPhotoURL] = useState("");
-  const [email, setEmail] = useState("");
-  const [role, setRole] = useState("borrower");
-  const [password, setPassword] = useState("");
+  const { createUser, updateUserProfile } = useContext(AuthContext);
   const navigate = useNavigate();
+  const [error, setError] = useState("");
 
-  const handleRegister = async (e) => {
+  const handleRegister = e => {
     e.preventDefault();
+    setError("");
 
-    // Password validation
-    if (!/[A-Z]/.test(password)) return toast.error("Password must contain at least 1 uppercase letter");
-    if (!/[a-z]/.test(password)) return toast.error("Password must contain at least 1 lowercase letter");
-    if (password.length < 6) return toast.error("Password must be at least 6 characters");
+    const form = e.target;
+    const name = form.name.value;
+    const photo = form.photo.value;
+    const role = form.role.value;
+    const email = form.email.value;
+    const password = form.password.value;
 
-    try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      await updateProfile(userCredential.user, {
-        displayName: name,
-        photoURL: photoURL,
-      });
-
-      toast.success("Registration successful!");
-      navigate("/dashboard"); // redirect after registration
-    } catch (error) {
-      console.error(error);
-      toast.error(error.message || "Registration failed");
+    if (!/[A-Z]/.test(password)) {
+      return setError("Password must have an uppercase letter");
     }
+    if (!/[a-z]/.test(password)) {
+      return setError("Password must have a lowercase letter");
+    }
+    if (password.length < 6) {
+      return setError("Password must be at least 6 characters");
+    }
+
+    createUser(email, password)
+      .then(() => {
+        updateUserProfile(name, photo);
+
+        // Save user to DB
+        fetch("http://localhost:5000/users", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ name, email, role }),
+        });
+
+        toast.success("Registration Successful!");
+        navigate("/");
+      })
+      .catch(err => {
+        setError(err.message);
+        toast.error("Registration Failed");
+      });
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-800">
-      <div className="bg-white dark:bg-gray-900 p-8 rounded-lg shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-6 text-center text-gray-800 dark:text-gray-100">Register</h2>
+    <div className="min-h-screen flex items-center justify-center bg-base-200">
+      <div className="card w-full max-w-md shadow-xl bg-base-100">
+        <form onSubmit={handleRegister} className="card-body">
+          <h2 className="text-2xl font-bold text-center">Register</h2>
 
-        <form onSubmit={handleRegister} className="space-y-4">
-          <div>
-            <label className="block mb-1 text-gray-700 dark:text-gray-300">Name</label>
-            <input type="text" value={name} onChange={(e) => setName(e.target.value)} required className="input input-bordered w-full"/>
-          </div>
+          <input name="name" placeholder="Full Name" className="input input-bordered" required />
+          <input name="photo" placeholder="Photo URL" className="input input-bordered" />
+          <input name="email" type="email" placeholder="Email" className="input input-bordered" required />
 
-          <div>
-            <label className="block mb-1 text-gray-700 dark:text-gray-300">Photo URL</label>
-            <input type="text" value={photoURL} onChange={(e) => setPhotoURL(e.target.value)} className="input input-bordered w-full"/>
-          </div>
+          <select name="role" className="select select-bordered" required>
+            <option value="">Select Role</option>
+            <option value="borrower">Borrower</option>
+            <option value="manager">Manager</option>
+          </select>
 
-          <div>
-            <label className="block mb-1 text-gray-700 dark:text-gray-300">Email</label>
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="input input-bordered w-full"/>
-          </div>
+          <input name="password" type="password" placeholder="Password" className="input input-bordered" required />
 
-          <div>
-            <label className="block mb-1 text-gray-700 dark:text-gray-300">Role</label>
-            <select value={role} onChange={(e) => setRole(e.target.value)} className="select select-bordered w-full">
-              <option value="borrower">Borrower</option>
-              <option value="manager">Manager</option>
-            </select>
-          </div>
+          {error && <p className="text-red-500 text-sm">{error}</p>}
 
-          <div>
-            <label className="block mb-1 text-gray-700 dark:text-gray-300">Password</label>
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="input input-bordered w-full"/>
-          </div>
+          <button className="btn btn-primary">Register</button>
 
-          <button type="submit" className="btn btn-primary w-full">Register</button>
+          <p className="text-center text-sm">
+            Already have an account?{" "}
+            <Link to="/login" className="text-primary font-semibold">
+              Login
+            </Link>
+          </p>
         </form>
-
-        <p className="text-center text-gray-600 dark:text-gray-400 mt-4">
-          Already have an account?{" "}
-          <Link to="/login" className="text-blue-500 hover:underline">
-            Login
-          </Link>
-        </p>
       </div>
     </div>
   );
