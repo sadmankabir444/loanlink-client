@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { AuthContext } from "../context/AuthProvider";
+import { AuthContext } from "../providers/AuthProvider";
 import toast from "react-hot-toast";
 
 const ApplyLoan = () => {

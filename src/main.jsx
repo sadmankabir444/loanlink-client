@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { RouterProvider } from "react-router-dom";
 import router from "./routes/Router";
-import AuthProvider from "./context/AuthProvider";
+import AuthProvider from "./providers/AuthProvider";
 import { Toaster } from "react-hot-toast";
 import "./index.css";
 

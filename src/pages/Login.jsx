@@ -1,84 +1,83 @@
 import { useContext, useState } from "react";
-import { AuthContext } from "../context/AuthProvider";
+import { AuthContext } from "../providers/AuthProvider";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import toast from "react-hot-toast";
-import { useNavigate, useLocation, Link } from "react-router-dom";
+import { FaEye, FaEyeSlash, FaGoogle } from "react-icons/fa";
 
 const Login = () => {
-  const { loginUser, googleLogin } = useContext(AuthContext);
+  const { login, googleLogin } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from?.pathname || "/";
-
-  const [error, setError] = useState("");
+  const [showPass, setShowPass] = useState(false);
 
   const handleLogin = e => {
     e.preventDefault();
-    setError("");
-    const form = e.target;
-    const email = form.email.value;
-    const password = form.password.value;
+    const email = e.target.email.value;
+    const password = e.target.password.value;
 
-    loginUser(email, password)
+    login(email, password)
       .then(() => {
-        toast.success("Login Successful!");
+        toast.success("Login Successful");
         navigate(from, { replace: true });
       })
-      .catch(err => {
-        setError(err.message);
-        toast.error("Invalid Email or Password");
-      });
-  };
-
-  const handleGoogleLogin = () => {
-    googleLogin()
-      .then(() => {
-        toast.success("Google Login Successful!");
-        navigate("/");
-      })
-      .catch(() => toast.error("Google Login Failed"));
+      .catch(() => toast.error("Invalid email or password"));
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-base-200">
-      <div className="card w-full max-w-md shadow-xl bg-base-100">
-        <form onSubmit={handleLogin} className="card-body">
-          <h2 className="text-2xl font-bold text-center">Login</h2>
+    <div className="
+      min-h-screen flex items-center justify-center
+      bg-gradient-to-br
+      from-indigo-200 via-purple-200 to-pink-200
+      dark:from-indigo-950 dark:via-purple-900 dark:to-pink-950
+      transition-colors duration-500
+    ">
+      <div className="w-full max-w-md bg-base-100/90 dark:bg-base-300/20 backdrop-blur-xl rounded-2xl shadow-xl p-8">
+        <h2 className="text-3xl font-bold text-center mb-6">Welcome Back</h2>
 
+        <form onSubmit={handleLogin} className="space-y-4">
           <input
-            type="email"
             name="email"
+            type="email"
             placeholder="Email"
-            className="input input-bordered"
+            className="input input-bordered w-full"
             required
           />
 
-          <input
-            type="password"
-            name="password"
-            placeholder="Password"
-            className="input input-bordered"
-            required
-          />
+          <div className="relative">
+            <input
+              name="password"
+              type={showPass ? "text" : "password"}
+              placeholder="Password"
+              className="input input-bordered w-full"
+              required
+            />
+            <span
+              onClick={() => setShowPass(!showPass)}
+              className="absolute right-4 top-3 cursor-pointer"
+            >
+              {showPass ? <FaEyeSlash /> : <FaEye />}
+            </span>
+          </div>
 
-          {error && <p className="text-red-500 text-sm">{error}</p>}
-
-          <button className="btn btn-primary">Login</button>
-
-          <button
-            type="button"
-            onClick={handleGoogleLogin}
-            className="btn btn-outline"
-          >
-            Continue with Google
-          </button>
-
-          <p className="text-center text-sm">
-            New here?{" "}
-            <Link to="/register" className="text-primary font-semibold">
-              Register
-            </Link>
-          </p>
+          <button className="btn btn-primary w-full">Login</button>
         </form>
+
+        <div className="divider">OR</div>
+
+        <button
+          onClick={googleLogin}
+          className="btn btn-outline w-full flex gap-2"
+        >
+          <FaGoogle /> Continue with Google
+        </button>
+
+        <p className="text-center mt-4 text-sm">
+          New here?{" "}
+          <Link to="/register" className="link link-primary">
+            Create account
+          </Link>
+        </p>
       </div>
     </div>
   );
