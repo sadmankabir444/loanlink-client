@@ -1,44 +1,82 @@
-import React from "react";
-import { useAuth } from "../../context/AuthProvider";
+import { useEffect, useState } from "react";
+import useAxiosSecure from "../hooks/useAxiosSecure";
+import LoadingSpinner from "../components/LoadingSpinner";
+import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
 
-export default function Profile() {
-  const { user, logout } = useAuth();
+const Profile = () => {
+  const axiosSecure = useAxiosSecure();
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout();
-    toast.success("Logged out successfully!");
-    navigate("/login");
+  const fetchProfile = async () => {
+    try {
+      setLoading(true);
+      const res = await axiosSecure.get("/users/profile");
+      setUser(res.data);
+    } catch (error) {
+      Swal.fire("Error", "Failed to fetch profile", "error");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  if (!user) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  useEffect(() => {
+    fetchProfile();
+  }, []);
+
+  const handleLogout = () => {
+    Swal.fire({
+      title: "Logout?",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Yes, Logout",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        localStorage.removeItem("access_token");
+        navigate("/login");
+      }
+    });
+  };
+
+  if (loading) return <LoadingSpinner />;
 
   return (
-    <div className="max-w-2xl mx-auto mt-8 p-6 bg-white rounded-lg shadow">
-      <h2 className="text-3xl font-semibold mb-6">My Profile</h2>
+    <div className="p-4 max-w-3xl mx-auto">
+      <h2 className="text-3xl font-bold text-primary mb-6">My Profile</h2>
 
-      <div className="space-y-4">
-        <div>
-          <strong>Name:</strong> {user.name || "N/A"}
+      <div className="card bg-base-100 shadow-xl p-6 flex flex-col md:flex-row items-center gap-6">
+        <img
+          src={user?.photoURL || "https://via.placeholder.com/150"}
+          alt={user?.name}
+          className="w-32 h-32 rounded-full object-cover border-2 border-primary"
+        />
+
+        <div className="flex-1 space-y-2">
+          <p>
+            <span className="font-semibold">Name: </span> {user?.name}
+          </p>
+          <p>
+            <span className="font-semibold">Email: </span> {user?.email}
+          </p>
+          <p>
+            <span className="font-semibold">Role: </span> {user?.role}
+          </p>
+          <p>
+            <span className="font-semibold">Joined: </span>{" "}
+            {new Date(user?.createdAt).toLocaleDateString()}
+          </p>
         </div>
-        <div>
-          <strong>Email:</strong> {user.email}
-        </div>
-        <div>
-          <strong>Role:</strong> {user.role || "Borrower"}
-        </div>
-        {user.photoURL && (
-          <div>
-            <img src={user.photoURL} alt="Profile" className="w-32 h-32 rounded-full object-cover mt-2" />
-          </div>
-        )}
       </div>
 
-      <button onClick={handleLogout} className="btn btn-error mt-6">
-        Logout
-      </button>
+      <div className="mt-6 text-center">
+        <button className="btn btn-error" onClick={handleLogout}>
+          Logout
+        </button>
+      </div>
     </div>
   );
-}
+};
+
+export default Profile;

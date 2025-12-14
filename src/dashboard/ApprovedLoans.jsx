@@ -1,68 +1,105 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { toast } from "react-toastify";
+import { useEffect, useState } from "react";
+import Swal from "sweetalert2";
+import useAxiosSecure from "../hooks/useAxiosSecure";
+import LoadingSpinner from "../components/LoadingSpinner";
 
-export default function ApprovedLoans() {
-  const [loans, setLoans] = useState([]);
+const ApprovedLoans = () => {
+  const axiosSecure = useAxiosSecure();
+  const [apps, setApps] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchApprovedLoans = async () => {
+  const fetchApps = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/loan-applications?status=approved");
-      setLoans(res.data);
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to fetch approved loans");
+      setLoading(true);
+      const res = await axiosSecure.get("/manager/approved");
+      setApps(res.data);
+    } catch (error) {
+      Swal.fire("Error", "Failed to fetch approved applications", "error");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchApprovedLoans();
+    fetchApps();
   }, []);
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  const handleView = (app) => {
+    Swal.fire({
+      title: "Approved Loan Details",
+      width: 650,
+      html: `
+        <div style="text-align:left">
+          <p><b>User:</b> ${app.userName} (${app.userEmail})</p>
+          <p><b>Loan Title:</b> ${app.loanTitle}</p>
+          <p><b>Category:</b> ${app.loanCategory}</p>
+          <p><b>Amount:</b> $${app.loanAmount}</p>
+          <p><b>Status:</b> ${app.status}</p>
+          <p><b>Approved Date:</b> ${new Date(
+            app.approvedAt
+          ).toLocaleDateString()}</p>
+          <p><b>Address:</b> ${app.address}</p>
+          <p><b>Reason:</b> ${app.reason}</p>
+        </div>
+      `,
+    });
+  };
 
-  if (!loans.length) return <div className="min-h-screen flex items-center justify-center">No approved loans</div>;
+  if (loading) return <LoadingSpinner />;
 
   return (
-    <div className="max-w-6xl mx-auto mt-8 px-4">
-      <h2 className="text-3xl font-semibold mb-6">Approved Loan Applications</h2>
+    <div className="p-4">
+      <h2 className="text-3xl font-bold text-primary mb-6">
+        Approved Loan Applications
+      </h2>
+
       <div className="overflow-x-auto">
-        <table className="table w-full">
-          <thead>
+        <table className="table table-zebra w-full">
+          <thead className="bg-base-200">
             <tr>
+              <th>Loan ID</th>
+              <th>User</th>
               <th>Loan Title</th>
-              <th>User Info</th>
               <th>Amount</th>
               <th>Approved Date</th>
-              <th>Actions</th>
+              <th className="text-center">Actions</th>
             </tr>
           </thead>
+
           <tbody>
-            {loans.map((loan) => (
-              <tr key={loan._id}>
-                <td>{loan.loanTitle}</td>
+            {apps.map((app) => (
+              <tr key={app._id}>
+                <td>{app._id.slice(0, 6)}...</td>
                 <td>
-                  {loan.firstName} {loan.lastName} <br />
-                  {loan.userEmail}
+                  <p className="font-semibold">{app.userName}</p>
+                  <p className="text-sm opacity-70">{app.userEmail}</p>
                 </td>
-                <td>${loan.loanAmount}</td>
-                <td>{new Date(loan.approvedAt).toLocaleDateString()}</td>
-                <td>
+                <td>{app.loanTitle}</td>
+                <td>${app.loanAmount}</td>
+                <td>{new Date(app.approvedAt).toLocaleDateString()}</td>
+                <td className="text-center">
                   <button
-                    className="btn btn-sm btn-info"
-                    onClick={() => alert(JSON.stringify(loan, null, 2))}
+                    className="btn btn-xs btn-info"
+                    onClick={() => handleView(app)}
                   >
                     View
                   </button>
                 </td>
               </tr>
             ))}
+
+            {apps.length === 0 && (
+              <tr>
+                <td colSpan="6" className="text-center py-6">
+                  No approved applications
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
     </div>
   );
-}
+};
+
+export default ApprovedLoans;
