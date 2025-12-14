@@ -5,7 +5,6 @@ import LoadingSpinner from "../components/LoadingSpinner";
 
 const AllLoansAdmin = () => {
   const axiosSecure = useAxiosSecure();
-
   const [loans, setLoans] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -38,14 +37,14 @@ const AllLoansAdmin = () => {
     }
   };
 
-  // ✏️ Update Loan (basic modal – extend later)
+  // ✏️ Update Loan
   const handleUpdate = async (loan) => {
     const { value: formData } = await Swal.fire({
       title: "Update Loan",
       html: `
-        <input id="title" class="swal2-input" placeholder="Title" value="${loan.title}">
-        <input id="interest" class="swal2-input" placeholder="Interest" value="${loan.interest}">
-        <input id="category" class="swal2-input" placeholder="Category" value="${loan.category}">
+        <input id="title" class="swal2-input" placeholder="Title" value="${loan.title}" />
+        <input id="interest" class="swal2-input" placeholder="Interest" value="${loan.interest}" />
+        <input id="category" class="swal2-input" placeholder="Category" value="${loan.category}" />
       `,
       showCancelButton: true,
       preConfirm: () => {
@@ -101,10 +100,7 @@ const AllLoansAdmin = () => {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-3xl font-bold text-primary">
-        All Loans (Admin)
-      </h2>
-
+      <h2 className="text-3xl font-bold text-primary">All Loans (Admin)</h2>
       <div className="overflow-x-auto bg-base-100 rounded-xl shadow">
         <table className="table table-zebra">
           <thead className="bg-base-200">
@@ -117,7 +113,6 @@ const AllLoansAdmin = () => {
               <th className="text-center">Actions</th>
             </tr>
           </thead>
-
           <tbody>
             {loans.map((loan) => (
               <tr key={loan._id}>
@@ -128,22 +123,17 @@ const AllLoansAdmin = () => {
                     className="w-20 h-14 object-cover rounded"
                   />
                 </td>
-
                 <td className="font-semibold">{loan.title}</td>
                 <td>{loan.interest}%</td>
                 <td>{loan.category}</td>
-
                 <td>
                   <input
                     type="checkbox"
                     className="toggle toggle-primary"
                     checked={loan.showOnHome || false}
-                    onChange={() =>
-                      handleToggleHome(loan._id, loan.showOnHome)
-                    }
+                    onChange={() => handleToggleHome(loan._id, loan.showOnHome)}
                   />
                 </td>
-
                 <td className="text-center space-x-2">
                   <button
                     onClick={() => handleUpdate(loan)}
