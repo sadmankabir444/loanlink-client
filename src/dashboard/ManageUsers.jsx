@@ -18,7 +18,7 @@ const ManageUsers = () => {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const res = await axios.get("http://localhost:5000/users", {
+      const res = await axios.get("http://localhost:3000/users", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUsers(res.data.users);
@@ -54,7 +54,7 @@ const ManageUsers = () => {
 
     try {
       await axios.patch(
-        `http://localhost:5000/users/role/${userId}`,
+        `http://localhost:3000/users/role/${userId}`,
         { role: newRole },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -81,7 +81,7 @@ const ManageUsers = () => {
       // Unsuspend
       try {
         await axios.patch(
-          `http://localhost:5000/users/suspend/${user._id}`,
+          `http://localhost:3000/users/suspend/${user._id}`,
           { suspended: false, reason: "" },
           { headers: { Authorization: `Bearer ${token}` } }
         );
@@ -99,7 +99,7 @@ const ManageUsers = () => {
     // Suspend
     try {
       await axios.patch(
-        `http://localhost:5000/users/suspend/${user._id}`,
+        `http://localhost:3000/users/suspend/${user._id}`,
         { suspended: true, reason },
         { headers: { Authorization: `Bearer ${token}` } }
       );

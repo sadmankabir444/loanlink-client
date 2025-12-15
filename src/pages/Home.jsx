@@ -1,30 +1,42 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, useAnimation } from "framer-motion";
 import LoanCard from "../components/LoanCard";
 
 const Home = () => {
   const [loans, setLoans] = useState([]);
-  const [currentFeedback, setCurrentFeedback] = useState(0);
+  const controls = useAnimation();
 
   const feedbacks = [
     {
       name: "Rahim Ahmed",
       role: "Small Business Owner",
       message:
-        "LoanLink made the loan application process extremely simple and transparent. I got approved faster than expected.",
+        "LoanLink made the entire loan process smooth and stress-free. Truly a modern platform.",
     },
     {
       name: "Nusrat Jahan",
       role: "Entrepreneur",
       message:
-        "The dashboard experience is smooth and easy to use. Tracking my loan status has never been this convenient.",
+        "The transparency and real-time updates gave me full confidence throughout the process.",
     },
     {
       name: "Tanvir Hasan",
       role: "Freelancer",
       message:
-        "I really liked how everything is organized. From applying to repayment tracking, everything is clear.",
+        "Beautiful UI, simple flow, and fast approval. LoanLink is a game changer.",
+    },
+    {
+      name: "Ayesha Siddika",
+      role: "Startup Founder",
+      message:
+        "From applying to tracking EMI — everything is well organized and easy to use.",
+    },
+    {
+      name: "Imran Hossain",
+      role: "Retail Owner",
+      message:
+        "Highly recommended for small businesses. Secure, fast, and reliable platform.",
     },
   ];
 
@@ -41,17 +53,17 @@ const Home = () => {
     };
 
     fetchLoans();
-  }, []);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentFeedback((prev) =>
-        prev === feedbacks.length - 1 ? 0 : prev + 1
-      );
-    }, 4000);
-
-    return () => clearInterval(interval);
-  }, [feedbacks.length]);
+    // start carousel animation
+    controls.start({
+      x: ["0%", "-100%"],
+      transition: {
+        repeat: Infinity,
+        duration: 30,
+        ease: "linear",
+      },
+    });
+  }, [controls]);
 
   return (
     <div className="overflow-hidden">
@@ -128,81 +140,43 @@ const Home = () => {
         </div>
       </section>
 
-      {/* ================= CUSTOMER FEEDBACK ================= */}
-      <section className="py-20 bg-base-100 dark:bg-base-200/10 transition-colors">
-        <div className="max-w-4xl mx-auto px-6 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-12">
-            What Our Users Say
+      {/* ================= CUSTOMER FEEDBACK (HOVER PAUSE) ================= */}
+      <section className="py-20 bg-gradient-to-r from-indigo-100 via-purple-100 to-pink-100 dark:from-indigo-950 dark:via-purple-900 dark:to-pink-950">
+        <div className="max-w-7xl mx-auto px-6">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-14">
+            Trusted by Real People
           </h2>
 
-          <motion.div
-            key={currentFeedback}
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="p-8 rounded-2xl shadow bg-base-200 dark:bg-base-300/10"
-          >
-            <p className="text-lg opacity-90 mb-6">
-              “{feedbacks[currentFeedback].message}”
-            </p>
-            <h4 className="font-semibold text-xl">
-              {feedbacks[currentFeedback].name}
-            </h4>
-            <p className="opacity-70">
-              {feedbacks[currentFeedback].role}
-            </p>
-          </motion.div>
-
-          <div className="flex justify-center gap-3 mt-6">
-            {feedbacks.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentFeedback(index)}
-                className={`w-3 h-3 rounded-full ${
-                  index === currentFeedback
-                    ? "bg-primary"
-                    : "bg-gray-400/50"
-                }`}
-              />
-            ))}
+          <div className="overflow-hidden">
+            <motion.div
+              className="flex gap-8"
+              animate={controls}
+              onHoverStart={() => controls.stop()}
+              onHoverEnd={() =>
+                controls.start({
+                  x: ["0%", "-100%"],
+                  transition: {
+                    repeat: Infinity,
+                    duration: 30,
+                    ease: "linear",
+                  },
+                })
+              }
+            >
+              {[...feedbacks, ...feedbacks].map((item, index) => (
+                <div
+                  key={index}
+                  className="min-w-[320px] max-w-[320px] bg-white dark:bg-base-200 shadow-xl rounded-2xl p-6 border border-base-300"
+                >
+                  <p className="opacity-90 mb-5 text-sm leading-relaxed">
+                    “{item.message}”
+                  </p>
+                  <h4 className="font-semibold text-lg">{item.name}</h4>
+                  <p className="text-sm opacity-70">{item.role}</p>
+                </div>
+              ))}
+            </motion.div>
           </div>
-        </div>
-      </section>
-
-      {/* ================= WHY CHOOSE US ================= */}
-      <section className="max-w-7xl mx-auto px-6 py-20">
-        <div className="grid md:grid-cols-2 gap-12 items-center">
-          <motion.div
-            initial={{ opacity: 0, x: -40 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-          >
-            <h2 className="text-3xl md:text-4xl font-bold mb-6">
-              Why Choose LoanLink?
-            </h2>
-            <ul className="space-y-4 opacity-90">
-              <li>✔ Transparent loan approval workflow</li>
-              <li>✔ Secure authentication & data protection</li>
-              <li>✔ Role-based dashboards (Borrower / Manager / Admin)</li>
-              <li>✔ Real-time loan tracking & status updates</li>
-            </ul>
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, x: 40 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-            className="bg-gradient-to-br from-primary to-secondary text-white p-10 rounded-2xl"
-          >
-            <h3 className="text-2xl font-bold mb-4">
-              Designed for Real Financial Impact
-            </h3>
-            <p className="opacity-90">
-              LoanLink bridges borrowers and organizations through a simple,
-              efficient and scalable digital loan management system.
-            </p>
-          </motion.div>
         </div>
       </section>
 

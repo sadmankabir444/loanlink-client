@@ -4,6 +4,7 @@ import { createBrowserRouter } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout";
 import DashboardLayout from "../layouts/DashboardLayout";
 
+
 /* Pages (Public) */
 import Home from "../pages/Home";
 import AllLoans from "../pages/AllLoans";
@@ -22,6 +23,7 @@ import Applications from "../dashboard/Applications";
 
 /* Route Guards */
 import PrivateRoute from "../components/PrivateRoute";
+import AdminRoute from "../components/AdminRoute";
 
 const router = createBrowserRouter([
   {
@@ -30,22 +32,10 @@ const router = createBrowserRouter([
     errorElement: <ErrorPage />,
     children: [
       /* ---------- Public Routes ---------- */
-      {
-        index: true,
-        element: <Home />,
-      },
-      {
-        path: "loans",
-        element: <AllLoans />,
-      },
-      {
-        path: "login",
-        element: <Login />,
-      },
-      {
-        path: "register",
-        element: <Register />,
-      },
+      { index: true, element: <Home /> },
+      { path: "loans", element: <AllLoans /> },
+      { path: "login", element: <Login /> },
+      { path: "register", element: <Register /> },
 
       /* ---------- Protected Public Routes ---------- */
       {
@@ -65,7 +55,7 @@ const router = createBrowserRouter([
         ),
       },
 
-      /* ---------- Dashboard Routes ---------- */
+      /* ---------- DASHBOARD ---------- */
       {
         path: "dashboard",
         element: (
@@ -74,25 +64,42 @@ const router = createBrowserRouter([
           </PrivateRoute>
         ),
         children: [
+          /* Borrower */
+          {
+            index: true,
+            element: <MyLoans />,
+          },
           {
             path: "my-loans",
             element: <MyLoans />,
           },
+
+          /* Manager */
           {
             path: "pending-loans",
             element: <PendingLoans />,
           },
           {
+            path: "applications",
+            element: <Applications />,
+          },
+
+          /* Admin Only */
+          {
             path: "manage-users",
-            element: <ManageUsers />,
+            element: (
+              <AdminRoute>
+                <ManageUsers />
+              </AdminRoute>
+            ),
           },
           {
             path: "all-loans",
-            element: <AdminLoans />,
-          },
-          {
-            path: "applications",
-            element: <Applications />,
+            element: (
+              <AdminRoute>
+                <AdminLoans />
+              </AdminRoute>
+            ),
           },
         ],
       },

@@ -1,9 +1,11 @@
 // src/App.jsx
-import React from "react";
 import { Routes, Route } from "react-router-dom";
 
-// Public Layout & Pages
+/* ================== LAYOUTS ================== */
 import MainLayout from "./layouts/MainLayout";
+import DashLayout from "./layouts/DashLayout";
+
+/* ================== PUBLIC PAGES ================== */
 import Home from "./pages/Home";
 import AllLoans from "./pages/AllLoans";
 import LoanDetails from "./pages/LoanDetails";
@@ -11,30 +13,27 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import NotFound from "./pages/NotFound";
 
-// Protected Wrapper (for single routes)
+/* ================== ROUTE GUARDS ================== */
 import ProtectedRoute from "./components/ProtectedRoute";
-
-// Dashboard Layout & Role-based Protected Routes
 import PrivateRoute from "./components/PrivateRoute";
-import DashboardLayout from "./layouts/DashboardLayout";
 
-// Dashboard Pages
-import MyLoans from "./pages/dashboard/MyLoans";
-import Profile from "./pages/dashboard/Profile";
-import PendingLoans from "./pages/dashboard/PendingLoans";
-import ApprovedLoans from "./pages/dashboard/ApprovedLoans";
-import ManageUsers from "./pages/dashboard/ManageUsers";
-import AllLoansAdmin from "./pages/dashboard/AllLoansAdmin";
+/* ================== DASHBOARD PAGES ================== */
+import MyLoans from "./dashboard/MyLoans";
+import Profile from "./dashboard/Profile";
+import PendingLoans from "./dashboard/PendingLoans";
+import ApprovedLoans from "./dashboard/ApprovedLoans";
+import ManageUsers from "./dashboard/ManageUsers";
+import AllLoansAdmin from "./dashboard/AllLoansAdmin";
 
 export default function App() {
   return (
     <Routes>
-      {/* ---------- PUBLIC LAYOUT ---------- */}
+      {/* ================= PUBLIC ROUTES ================= */}
       <Route path="/" element={<MainLayout />}>
         <Route index element={<Home />} />
         <Route path="all-loans" element={<AllLoans />} />
 
-        {/* Protected single route inside public layout */}
+        {/* Single protected route */}
         <Route
           path="loan/:id"
           element={
@@ -48,18 +47,18 @@ export default function App() {
         <Route path="register" element={<Register />} />
       </Route>
 
-      {/* ---------- PROTECTED DASHBOARD ROUTES ---------- */}
+      {/* ================= DASHBOARD (ROLE BASED) ================= */}
       <Route
         element={
           <PrivateRoute allowedRoles={["borrower", "manager", "admin"]} />
         }
       >
-        <Route path="/dashboard" element={<DashboardLayout />}>
-          {/* Borrower routes */}
+        <Route path="/dashboard" element={<DashLayout />}>
+          {/* Borrower */}
           <Route path="my-loans" element={<MyLoans />} />
           <Route path="profile" element={<Profile />} />
 
-          {/* Manager/Admin routes */}
+          {/* Manager / Admin */}
           <Route path="pending-loans" element={<PendingLoans />} />
           <Route path="approved-loans" element={<ApprovedLoans />} />
           <Route path="manage-users" element={<ManageUsers />} />
@@ -67,7 +66,7 @@ export default function App() {
         </Route>
       </Route>
 
-      {/* ---------- 404 NOT FOUND ---------- */}
+      {/* ================= 404 ================= */}
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

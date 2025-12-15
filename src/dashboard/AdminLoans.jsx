@@ -5,13 +5,13 @@ const AdminLoans = () => {
   const [loans, setLoans] = useState([]);
 
   useEffect(() => {
-    fetch("http://localhost:5000/loans")
+    fetch("http://localhost:3000/loans")
       .then(res => res.json())
       .then(data => setLoans(data));
   }, []);
 
   const handleDelete = id => {
-    fetch(`http://localhost:5000/loans/${id}`, {
+    fetch(`http://localhost:3000/loans/${id}`, {
       method: "DELETE",
     })
       .then(res => res.json())

@@ -1,14 +1,17 @@
-// src/components/ProtectedRoute.jsx
-import React from "react";
+import { useContext } from "react";
 import { Navigate, useLocation } from "react-router-dom";
-import { useAuth } from "../context/AuthProvider";
+import { AuthContext } from "../providers/AuthProvider";
 
-export default function ProtectedRoute({ children }) {
-  const { user, loading } = useAuth();
+const ProtectedRoute = ({ children }) => {
+  const { user, loading } = useContext(AuthContext);
   const location = useLocation();
 
   if (loading) {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        Loading...
+      </div>
+    );
   }
 
   if (!user) {
@@ -16,4 +19,6 @@ export default function ProtectedRoute({ children }) {
   }
 
   return children;
-}
+};
+
+export default ProtectedRoute;
