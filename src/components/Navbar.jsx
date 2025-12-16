@@ -29,8 +29,7 @@ const Navbar = () => {
     }
   };
 
-  const activeClass =
-    "text-primary font-semibold border-b-2 border-primary";
+  const activeClass = "text-primary font-semibold border-b-2 border-primary";
   const normalClass = "hover:text-primary transition";
 
   const navLinks = (
@@ -38,9 +37,7 @@ const Navbar = () => {
       <li>
         <NavLink
           to="/"
-          className={({ isActive }) =>
-            isActive ? activeClass : normalClass
-          }
+          className={({ isActive }) => (isActive ? activeClass : normalClass)}
         >
           Home
         </NavLink>
@@ -49,9 +46,7 @@ const Navbar = () => {
       <li>
         <NavLink
           to="/loans"
-          className={({ isActive }) =>
-            isActive ? activeClass : normalClass
-          }
+          className={({ isActive }) => (isActive ? activeClass : normalClass)}
         >
           All Loans
         </NavLink>
@@ -137,10 +132,19 @@ const Navbar = () => {
         {/* Theme Toggle */}
         <button
           onClick={toggleTheme}
-          className="btn btn-sm btn-outline"
+          className={`relative w-14 h-7 rounded-full p-1 bg-white/30 dark:bg-gray-700/30 backdrop-blur-md border border-white/30 dark:border-gray-500 flex items-center transition-colors duration-300`}
           aria-label="Toggle Theme"
         >
-          {theme === "light" ? <CiDark size={20} /> : <CiSun size={20} />}
+          <span
+            className={`absolute top-1 left-1 w-5 h-5 bg-white dark:bg-gray-200 rounded-full shadow-md flex items-center justify-center transform transition-transform duration-300
+      ${theme === "light" ? "translate-x-0" : "translate-x-7"}`}
+          >
+            {theme === "light" ? (
+              <CiSun className="text-yellow-500" size={16} />
+            ) : (
+              <CiDark className="text-gray-800" size={16} />
+            )}
+          </span>
         </button>
 
         {/* Mobile Menu */}

@@ -54,7 +54,6 @@ const Home = () => {
 
     fetchLoans();
 
-    // start carousel animation
     controls.start({
       x: ["0%", "-100%"],
       transition: {
@@ -118,19 +117,28 @@ const Home = () => {
             How LoanLink Works
           </h2>
           <div className="grid md:grid-cols-3 gap-10 text-center">
-            <motion.div whileHover={{ y: -8 }} className="p-6 rounded-xl bg-base-100 shadow">
+            <motion.div
+              whileHover={{ y: -8 }}
+              className="p-6 rounded-xl bg-base-100 shadow"
+            >
               <h3 className="text-xl font-semibold mb-3">1. Choose a Loan</h3>
               <p className="opacity-80">
                 Browse available loans and select the one that suits your needs.
               </p>
             </motion.div>
-            <motion.div whileHover={{ y: -8 }} className="p-6 rounded-xl bg-base-100 shadow">
+            <motion.div
+              whileHover={{ y: -8 }}
+              className="p-6 rounded-xl bg-base-100 shadow"
+            >
               <h3 className="text-xl font-semibold mb-3">2. Apply Online</h3>
               <p className="opacity-80">
                 Submit your application digitally with required information.
               </p>
             </motion.div>
-            <motion.div whileHover={{ y: -8 }} className="p-6 rounded-xl bg-base-100 shadow">
+            <motion.div
+              whileHover={{ y: -8 }}
+              className="p-6 rounded-xl bg-base-100 shadow"
+            >
               <h3 className="text-xl font-semibold mb-3">3. Track & Repay</h3>
               <p className="opacity-80">
                 Track approval status, EMI plans and repayments in one place.
@@ -140,7 +148,56 @@ const Home = () => {
         </div>
       </section>
 
-      {/* ================= CUSTOMER FEEDBACK (HOVER PAUSE) ================= */}
+      {/* ================= WHY LOANLINK IS DIFFERENT ================= */}
+      <section className="py-20 bg-base-100 dark:bg-gray-950 transition-colors">
+        <div className="max-w-7xl mx-auto px-6">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 text-gray-800 dark:text-gray-100">
+            Why LoanLink Is Different
+          </h2>
+
+          <p className="text-center text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mb-14">
+            Designed for transparency, security and real-world microloan
+            management.
+          </p>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {[
+              {
+                title: "Secure & Trusted",
+                desc: "JWT authentication and role-based access keep user data fully protected.",
+              },
+              {
+                title: "Role Based System",
+                desc: "Separate dashboards for Borrower, Manager and Admin ensure clarity.",
+              },
+              {
+                title: "Live Status Tracking",
+                desc: "Track application approval, EMI plans and repayments in real time.",
+              },
+              {
+                title: "Transparent Workflow",
+                desc: "Every action is logged and visible — no hidden processing steps.",
+              },
+            ].map((item, i) => (
+              <div
+                key={i}
+                className="rounded-2xl p-6 bg-white dark:bg-gray-900
+          border border-gray-200 dark:border-gray-800
+          shadow-sm hover:shadow-lg transition-all duration-300"
+              >
+                <h3 className="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-100">
+                  {item.title}
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                  {item.desc}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ================= CUSTOMER FEEDBACK ================= */}
       <section className="py-20 bg-gradient-to-r from-indigo-100 via-purple-100 to-pink-100 dark:from-indigo-950 dark:via-purple-900 dark:to-pink-950">
         <div className="max-w-7xl mx-auto px-6">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-14">
@@ -157,7 +214,7 @@ const Home = () => {
                   x: ["0%", "-100%"],
                   transition: {
                     repeat: Infinity,
-                    duration: 30,
+                    duration: 20,
                     ease: "linear",
                   },
                 })
@@ -180,16 +237,20 @@ const Home = () => {
         </div>
       </section>
 
-      {/* ================= CALL TO ACTION ================= */}
-      <section className="py-20 text-center bg-gradient-to-r from-purple-300 via-indigo-300 to-pink-300 dark:from-purple-900 dark:via-indigo-900 dark:to-pink-900 transition-colors duration-500">
-        <h2 className="text-3xl md:text-4xl font-bold mb-6">
-          Ready to Get Started?
+      {/* ================= CTA (FOOTER BEFORE) ================= */}
+      <section className="py-20 text-center bg-gradient-to-b from-indigo-600 to-purple-700 dark:from-indigo-800 dark:to-purple-900 text-white transition-colors">
+        <h2 className="text-3xl md:text-4xl font-bold mb-4">
+          Start Your Loan Journey Today
         </h2>
-        <p className="mb-8 opacity-90">
-          Create an account today and take control of your financial future.
+        <p className="mb-8 opacity-90 max-w-xl mx-auto">
+          Join LoanLink and experience a secure, transparent and modern loan
+          management system built for real people.
         </p>
-        <Link to="/register" className="btn btn-primary px-10">
-          Apply for a Loan
+        <Link
+          to="/register"
+          className="btn btn-outline text-white border-white px-10"
+        >
+          Create Free Account
         </Link>
       </section>
     </div>

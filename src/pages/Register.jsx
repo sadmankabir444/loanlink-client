@@ -6,41 +6,40 @@ import { FaEye, FaEyeSlash, FaGoogle } from "react-icons/fa";
 
 const Register = () => {
   const { register, updateUserProfile, googleLogin } = useContext(AuthContext);
+
   const navigate = useNavigate();
   const [showPass, setShowPass] = useState(false);
-  const [loading, setLoading] = useState(false); // Loading state for register
+  const [loading, setLoading] = useState(false);
 
   // =======================
-  // Handle Email/Password Registration
+  // Email / Password Register
   // =======================
   const handleRegister = async (e) => {
     e.preventDefault();
-    const { name, photo, email, password, role } = e.target;
+    const form = e.target;
+
+    const name = form.name.value;
+    const photo = form.photo.value;
+    const email = form.email.value;
+    const password = form.password.value;
+    const role = form.role.value;
 
     // Password validation
-    if (!/[A-Z]/.test(password.value))
+    if (!/[A-Z]/.test(password))
       return toast.error("Password must contain uppercase");
-    if (!/[a-z]/.test(password.value))
+    if (!/[a-z]/.test(password))
       return toast.error("Password must contain lowercase");
-    if (password.value.length < 6)
-      return toast.error("Minimum 6 characters");
+    if (password.length < 6)
+      return toast.error("Minimum 6 characters required");
 
     try {
       setLoading(true);
-      await register(email.value, password.value);
-      await updateUserProfile(name.value, photo.value);
 
-      // Save user to backend
-      await fetch("http://localhost:3000/users", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: name.value,
-          email: email.value,
-          role: role.value,
-          photo: photo.value || "",
-        }),
-      });
+      // ✅ FIX: pass name + email + password
+      await register(name, email, password);
+
+      // Update Firebase profile
+      await updateUserProfile(name, photo);
 
       toast.success("Registration successful 🎉");
       navigate("/");
@@ -53,25 +52,13 @@ const Register = () => {
   };
 
   // =======================
-  // Handle Google Login
+  // Google Login
   // =======================
   const handleGoogleLogin = async () => {
     try {
       setLoading(true);
       const result = await googleLogin();
       const gUser = result.user;
-
-      // Save user to backend
-      await fetch("http://localhost:3000/users", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: gUser.displayName || "Google User",
-          email: gUser.email,
-          photo: gUser.photoURL || "",
-          role: "borrower",
-        }),
-      });
 
       toast.success("Google login successful 🎉");
       navigate("/");
@@ -94,7 +81,9 @@ const Register = () => {
       "
     >
       <div className="w-full max-w-lg bg-base-100/90 dark:bg-base-300/20 backdrop-blur-xl rounded-2xl shadow-xl p-8">
-        <h2 className="text-3xl font-bold text-center mb-6">Create Account</h2>
+        <h2 className="text-3xl font-bold text-center mb-6">
+          Create Account 🚀
+        </h2>
 
         <form onSubmit={handleRegister} className="space-y-4">
           <input
@@ -103,11 +92,13 @@ const Register = () => {
             className="input input-bordered w-full"
             required
           />
+
           <input
             name="photo"
-            placeholder="Photo URL"
+            placeholder="Photo URL (optional)"
             className="input input-bordered w-full"
           />
+
           <input
             name="email"
             type="email"
@@ -126,17 +117,17 @@ const Register = () => {
             <option value="manager">Manager</option>
           </select>
 
-          <div className="relative">
+          <div className="relative w-full">
             <input
               name="password"
               type={showPass ? "text" : "password"}
               placeholder="Password"
-              className="input input-bordered w-full"
+              className="input input-bordered w-full pr-12 z-10 relative"
               required
             />
             <span
               onClick={() => setShowPass(!showPass)}
-              className="absolute right-4 top-3 cursor-pointer"
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 z-20 cursor-pointer text-gray-600 hover:text-gray-900"
             >
               {showPass ? <FaEyeSlash /> : <FaEye />}
             </span>
@@ -160,7 +151,8 @@ const Register = () => {
           }`}
           disabled={loading}
         >
-          <FaGoogle /> {loading ? "Processing..." : "Continue with Google"}
+          <FaGoogle />
+          Continue with Google
         </button>
 
         <p className="text-center mt-4 text-sm">

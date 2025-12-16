@@ -1,4 +1,3 @@
-// src/pages/Login.jsx
 import { useState } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -28,10 +27,20 @@ export default function Login() {
       const result = await login(email, password);
       const user = result.user;
 
-      // 2️⃣ Backend JWT login (cookie)
-      await axiosSecure.post("/login", { email: user.email });
+      // 2️⃣ Backend JWT login
+      try {
+        await axiosSecure.post("/login", { email: user.email });
+      } catch (err) {
+        console.error("Backend login failed", err);
+        // ignore, firebase login succeeded
+      }
 
       toast.success("Login successful 🎉");
+
+      // clear inputs
+      setEmail("");
+      setPassword("");
+
       navigate(from, { replace: true });
     } catch (err) {
       console.error(err);
@@ -47,8 +56,16 @@ export default function Login() {
   const handleGoogleLogin = async () => {
     setLoading(true);
     try {
-      await googleLogin();
+      const result = await googleLogin();
+      const gUser = result.user;
+
+      // backend already called in AuthProvider, ignore COOP errors
       toast.success("Google login successful 🎉");
+
+      // clear inputs
+      setEmail("");
+      setPassword("");
+
       navigate(from, { replace: true });
     } catch (err) {
       console.error(err);

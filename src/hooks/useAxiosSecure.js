@@ -1,50 +1,35 @@
 import axios from "axios";
-import { useEffect } from "react";
-import useAuth from "./useAuth";
 
 const axiosSecure = axios.create({
   baseURL: "http://localhost:3000",
   withCredentials: true,
 });
 
-const useAxiosSecure = () => {
-  const { user, loading, logout } = useAuth();
+axiosSecure.interceptors.request.use(
+  (config) => {
+    // cookie already handled by browser
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
-  useEffect(() => {
-    // REQUEST interceptor
-    const reqInterceptor = axiosSecure.interceptors.request.use(
-      config => {
-        // wait until auth loading finished
-        if (loading) {
-          return Promise.reject("Auth loading");
-        }
-        return config;
-      },
-      error => Promise.reject(error)
-    );
+axiosSecure.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const status = error.response?.status;
 
-    // RESPONSE interceptor
-    const resInterceptor = axiosSecure.interceptors.response.use(
-      response => response,
-      error => {
-        const status = error.response?.status;
+    if (status === 401) {
+      console.log("❌ Unauthorized");
+    }
 
-        if (status === 401 || status === 403) {
-          console.log("🔒 Session expired");
-          logout?.();
-        }
+    if (status === 403) {
+      console.log("⛔ Forbidden");
+    }
 
-        return Promise.reject(error);
-      }
-    );
+    return Promise.reject(error);
+  }
+);
 
-    return () => {
-      axiosSecure.interceptors.request.eject(reqInterceptor);
-      axiosSecure.interceptors.response.eject(resInterceptor);
-    };
-  }, [loading, logout]);
-
-  return axiosSecure;
-};
+const useAxiosSecure = () => axiosSecure;
 
 export default useAxiosSecure;

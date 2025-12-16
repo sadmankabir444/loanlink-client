@@ -26,6 +26,7 @@ const ManageLoans = () => {
     }
   };
 
+  // ✅ Fix-2B applied: empty dependency to prevent double API calls
   useEffect(() => {
     fetchLoans();
   }, []);

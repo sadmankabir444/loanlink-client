@@ -22,58 +22,81 @@ const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   // ================= REGISTER =================
-  const register = async (email, password) => {
+  // Added 'name' parameter for borrower registration
+  const register = async (name, email, password) => {
     setLoading(true);
-    const result = await createUserWithEmailAndPassword(auth, email, password);
+    try {
+      const result = await createUserWithEmailAndPassword(auth, email, password);
 
-    await axios.post("http://localhost:3000/users", {
-      email,
-      role: "borrower",
-    });
+      // Save user to backend with name, email, role
+      try {
+        await axios.post("http://localhost:3000/users", {
+          name,       // <-- important: save name
+          email,
+          role: "borrower",
+        });
+      } catch (err) {
+        console.error("Backend user creation failed", err);
+      }
 
-    return result;
+      return result;
+    } finally {
+      setLoading(false);
+    }
   };
 
   // ================= LOGIN =================
   const login = async (email, password) => {
     setLoading(true);
+    try {
+      const result = await signInWithEmailAndPassword(auth, email, password);
 
-    const result = await signInWithEmailAndPassword(auth, email, password);
+      // backend login (ignore errors)
+      try {
+        await axios.post(
+          "http://localhost:3000/login",
+          { email, password },
+          { withCredentials: true }
+        );
+      } catch (err) {
+        console.error("Backend login failed, ignoring since Firebase login succeeded", err);
+      }
 
-    await axios.post(
-      "http://localhost:3000/login",
-      { email, password },
-      { withCredentials: true }
-    );
-
-    return result;
+      return result;
+    } finally {
+      setLoading(false);
+    }
   };
 
   // ================= GOOGLE LOGIN =================
   const googleLogin = async () => {
     setLoading(true);
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const gUser = result.user;
 
-    const result = await signInWithPopup(auth, googleProvider);
-    const gUser = result.user;
+      // Save Google user to backend
+      try {
+        await axios.post("http://localhost:3000/users", {
+          name: gUser.displayName,
+          email: gUser.email,
+          photo: gUser.photoURL,
+          role: "borrower",
+        });
+      } catch (err) {
+        console.error("Backend Google login failed, ignoring", err);
+      }
 
-    await axios.post("http://localhost:3000/users", {
-      email: gUser.email,
-      name: gUser.displayName,
-      photo: gUser.photoURL,
-      role: "borrower",
-    });
-
-    return result;
+      return result;
+    } finally {
+      setLoading(false);
+    }
   };
 
   // ================= UPDATE PROFILE =================
   const updateUserProfile = async (name, photoURL) => {
     if (!auth.currentUser) return;
-
-    return updateProfile(auth.currentUser, {
-      displayName: name,
-      photoURL,
-    });
+    return updateProfile(auth.currentUser, { displayName: name, photoURL });
   };
 
   // ================= LOGOUT =================
@@ -92,17 +115,10 @@ const AuthProvider = ({ children }) => {
           const res = await axios.get(
             `http://localhost:3000/users/${currentUser.email}`
           );
-
-          setUser({
-            ...currentUser,
-            role: res.data?.role || "borrower",
-          });
+          setUser({ ...currentUser, role: res.data?.role || "borrower" });
         } catch (err) {
           console.error("Failed to fetch role", err);
-          setUser({
-            ...currentUser,
-            role: "borrower",
-          });
+          setUser({ ...currentUser, role: "borrower" });
         }
       } else {
         setUser(null);
@@ -124,7 +140,9 @@ const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={authInfo}>{children}</AuthContext.Provider>
+    <AuthContext.Provider value={authInfo}>
+      {children}
+    </AuthContext.Provider>
   );
 };
 

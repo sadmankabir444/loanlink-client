@@ -25,6 +25,7 @@ const PendingLoans = () => {
     }
   };
 
+  // ✅ Fix-2B applied: empty dependency array
   useEffect(() => {
     fetchApplications();
   }, []);

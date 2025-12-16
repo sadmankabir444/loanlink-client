@@ -1,3 +1,4 @@
+// src/dashboard/Applications.jsx
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import useAxiosSecure from "../hooks/useAxiosSecure";
@@ -8,7 +9,6 @@ const Applications = () => {
   const [applications, setApplications] = useState([]);
   const [status, setStatus] = useState("all");
   const [loading, setLoading] = useState(true);
-
   const [search, setSearch] = useState("");
 
   // pagination
@@ -20,12 +20,15 @@ const Applications = () => {
   const fetchApplications = async () => {
     try {
       setLoading(true);
+
       const res = await axiosSecure.get(
         `/admin/loan-applications?status=${status}&page=${page}&limit=${limit}`
       );
-      setApplications(res.data.applications);
-      setTotal(res.data.total);
+
+      setApplications(res.data.applications || []);
+      setTotal(res.data.total || 0);
     } catch (error) {
+      console.error(error);
       Swal.fire("Error", "Failed to load applications", "error");
     } finally {
       setLoading(false);
@@ -34,6 +37,7 @@ const Applications = () => {
 
   useEffect(() => {
     fetchApplications();
+    // ⚠️ IMPORTANT: dependency limited
   }, [status, page]);
 
   const handleView = (app) => {
@@ -42,14 +46,14 @@ const Applications = () => {
       width: 650,
       html: `
         <div style="text-align:left">
-          <p><b>User:</b> ${app.userName} (${app.userEmail})</p>
-          <p><b>Loan Title:</b> ${app.loanTitle}</p>
-          <p><b>Category:</b> ${app.loanCategory}</p>
-          <p><b>Amount:</b> $${app.loanAmount}</p>
-          <p><b>Status:</b> ${app.status}</p>
-          <p><b>Applied Date:</b> ${new Date(app.createdAt).toLocaleDateString()}</p>
-          <p><b>Address:</b> ${app.address}</p>
-          <p><b>Reason:</b> ${app.reason}</p>
+          <p><b>User:</b> ${app.userName || ""} (${app.userEmail || ""})</p>
+          <p><b>Loan Title:</b> ${app.loanTitle || ""}</p>
+          <p><b>Category:</b> ${app.loanCategory || ""}</p>
+          <p><b>Amount:</b> $${app.loanAmount || ""}</p>
+          <p><b>Status:</b> ${app.status || ""}</p>
+          <p><b>Applied Date:</b> ${app.createdAt ? new Date(app.createdAt).toLocaleDateString() : ""}</p>
+          <p><b>Address:</b> ${app.address || ""}</p>
+          <p><b>Reason:</b> ${app.reason || ""}</p>
         </div>
       `,
     });
@@ -59,8 +63,10 @@ const Applications = () => {
 
   const filteredApplications = applications.filter(
     (app) =>
-      app.userName.toLowerCase().includes(search.toLowerCase()) ||
-      app.loanTitle.toLowerCase().includes(search.toLowerCase())
+      (app.userName || "").toLowerCase().includes(search.toLowerCase()) ||
+      (app.userEmail || "").toLowerCase().includes(search.toLowerCase()) ||
+      (app.loanTitle || "").toLowerCase().includes(search.toLowerCase()) ||
+      (app.loanCategory || "").toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -110,13 +116,13 @@ const Applications = () => {
           <tbody>
             {filteredApplications.map((app) => (
               <tr key={app._id}>
-                <td>{app._id.slice(0, 6)}...</td>
+                <td>{app._id?.slice(0, 6)}...</td>
                 <td>
-                  <p className="font-semibold">{app.userName}</p>
-                  <p className="text-sm opacity-70">{app.userEmail}</p>
+                  <p className="font-semibold">{app.userName || ""}</p>
+                  <p className="text-sm opacity-70">{app.userEmail || ""}</p>
                 </td>
-                <td>{app.loanCategory}</td>
-                <td>${app.loanAmount}</td>
+                <td>{app.loanCategory || ""}</td>
+                <td>${app.loanAmount || ""}</td>
                 <td>
                   <span
                     className={`badge ${
@@ -127,7 +133,7 @@ const Applications = () => {
                         : "badge-warning"
                     }`}
                   >
-                    {app.status}
+                    {app.status || ""}
                   </span>
                 </td>
                 <td className="text-center">

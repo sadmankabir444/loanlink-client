@@ -24,6 +24,7 @@ const ApprovedLoans = () => {
     }
   };
 
+  // ✅ Fix-2B applied: empty dependency array
   useEffect(() => {
     fetchApps();
   }, []);

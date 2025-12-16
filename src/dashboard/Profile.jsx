@@ -2,75 +2,68 @@ import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../providers/AuthProvider";
 import useAxiosSecure from "../hooks/useAxiosSecure";
 import LoadingSpinner from "../components/LoadingSpinner";
-import Swal from "sweetalert2";
-import { useNavigate } from "react-router-dom";
+import { FaUserCircle, FaEnvelope, FaUserTag } from "react-icons/fa";
 
 const Profile = () => {
-  const { user: contextUser } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
   const axiosSecure = useAxiosSecure();
-  const navigate = useNavigate();
-  const [user, setUser] = useState(contextUser || null);
-  const [loading, setLoading] = useState(!contextUser);
+  const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Fetch fresh profile if context does not have all info
+    if (!user?.email) return;
+
     const fetchProfile = async () => {
-      if (!contextUser) return;
       try {
-        setLoading(true);
-        const res = await axiosSecure.get("/users/profile");
-        setUser(res.data);
-      } catch {
-        Swal.fire("Error", "Failed to fetch profile", "error");
+        const res = await axiosSecure.get(`/users/${user.email}`);
+        setProfile(res.data);
+      } catch (err) {
+        console.error(err);
       } finally {
         setLoading(false);
       }
     };
 
     fetchProfile();
-  }, [contextUser, axiosSecure]);
+  }, [user?.email]);
 
-  const handleLogout = () => {
-    Swal.fire({
-      title: "Logout?",
-      icon: "question",
-      showCancelButton: true,
-      confirmButtonText: "Yes, Logout",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        localStorage.removeItem("access_token");
-        navigate("/login");
-      }
-    });
-  };
-
-  if (loading || !user) return <LoadingSpinner />;
+  if (loading) return <LoadingSpinner />;
 
   return (
-    <div className="p-4 max-w-3xl mx-auto">
-      <h2 className="text-3xl font-bold text-primary mb-6">My Profile</h2>
-
-      <div className="card bg-base-100 shadow-xl p-6 flex flex-col md:flex-row items-center gap-6">
-        <img
-          src={user.photoURL || "https://via.placeholder.com/150"}
-          alt={user.name}
-          className="w-32 h-32 rounded-full object-cover border-2 border-primary"
-        />
-
-        <div className="flex-1 space-y-2">
-          <p><strong>Name:</strong> {user.name}</p>
-          <p><strong>Email:</strong> {user.email}</p>
-          <p><strong>Role:</strong> {user.role}</p>
-          {user.createdAt && (
-            <p><strong>Joined:</strong> {new Date(user.createdAt).toLocaleDateString()}</p>
-          )}
-        </div>
+    <div className="max-w-4xl mx-auto p-6 space-y-8">
+      {/* Header Card */}
+      <div className="bg-gradient-to-r from-indigo-100 via-purple-100 to-pink-100 dark:from-indigo-900 dark:via-purple-800 dark:to-pink-900 
+                      text-gray-900 dark:text-white rounded-3xl p-10 shadow-xl flex flex-col items-center space-y-4 transition-colors duration-500">
+        <FaUserCircle className="text-8xl md:text-9xl" />
+        <h2 className="text-3xl md:text-4xl font-bold">{profile?.name || "N/A"}</h2>
+        <p className="opacity-80 text-lg">{profile?.role}</p>
       </div>
 
-      <div className="mt-6 text-center">
-        <button className="btn btn-error" onClick={handleLogout}>
-          Logout
-        </button>
+      {/* Account Details */}
+      <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-lg p-8 transition-colors duration-500">
+        <h3 className="text-2xl font-semibold border-b border-gray-300 dark:border-gray-700 pb-3 mb-6
+                       text-gray-900 dark:text-gray-200">
+          Account Details
+        </h3>
+
+        <div className="flex flex-col md:flex-row md:items-center md:gap-6 mb-4">
+          <div className="flex items-center gap-3 mb-3 md:mb-0">
+            <FaEnvelope className="text-indigo-500 text-xl" />
+            <span className="text-gray-900 dark:text-gray-200">{profile?.email}</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <FaUserTag className="text-purple-500 text-xl" />
+            <span className="text-gray-900 dark:text-gray-200">{profile?.role}</span>
+          </div>
+        </div>
+
+        {/* Optional extra info */}
+        {profile?.phone && (
+          <div className="flex items-center gap-3 mt-4">
+            <FaUserTag className="text-green-500 text-xl" />
+            <span className="text-gray-900 dark:text-gray-200">{profile.phone}</span>
+          </div>
+        )}
       </div>
     </div>
   );
