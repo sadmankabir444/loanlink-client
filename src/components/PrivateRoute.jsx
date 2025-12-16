@@ -1,40 +1,34 @@
 import { useContext } from "react";
-import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { Navigate, useLocation, Outlet } from "react-router-dom";
 import { AuthContext } from "../providers/AuthProvider";
-import useUserRole from "../hooks/useUserRole";
 
-const PrivateRoute = ({ allowedRoles }) => {
+const PrivateRoute = ({ children, allowedRoles }) => {
   const { user, loading } = useContext(AuthContext);
   const location = useLocation();
 
-  // role only needed if allowedRoles provided
-  const [role, roleLoading] = useUserRole(user?.email);
-
-  // ======================
-  // Loading State
-  // ======================
-  if (loading || (allowedRoles && roleLoading)) {
-    return <div className="text-center mt-20">Loading...</div>;
+  // 🔄 auth loading
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <span className="loading loading-spinner loading-lg"></span>
+      </div>
+    );
   }
 
-  // ======================
-  // Not Logged In
-  // ======================
+  // 🔒 not logged in
   if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // ======================
-  // Role Based Protection
-  // ======================
-  if (allowedRoles && !allowedRoles.includes(role)) {
+  // ⛔ role protection
+  if (allowedRoles && !allowedRoles.includes(user.role)) {
     return <Navigate to="/" replace />;
   }
 
-  // ======================
-  // Authorized
-  // ======================
-  return <Outlet />;
+  // ✅ IMPORTANT PART
+  // children থাকলে children দেখাও
+  // না থাকলে nested route এর জন্য Outlet দেখাও
+  return children ? children : <Outlet />;
 };
 
 export default PrivateRoute;

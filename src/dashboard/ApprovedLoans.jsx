@@ -7,7 +7,11 @@ const ApprovedLoans = () => {
   const axiosSecure = useAxiosSecure();
   const [apps, setApps] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
 
+  // =====================
+  // Fetch Approved Loans
+  // =====================
   const fetchApps = async () => {
     try {
       setLoading(true);
@@ -24,6 +28,9 @@ const ApprovedLoans = () => {
     fetchApps();
   }, []);
 
+  // =====================
+  // View Details
+  // =====================
   const handleView = (app) => {
     Swal.fire({
       title: "Approved Loan Details",
@@ -45,13 +52,34 @@ const ApprovedLoans = () => {
     });
   };
 
+  // =====================
+  // Filtered Loans
+  // =====================
+  const filteredApps = apps.filter(
+    (app) =>
+      app.loanTitle.toLowerCase().includes(search.toLowerCase()) ||
+      app.loanCategory.toLowerCase().includes(search.toLowerCase()) ||
+      app.userName.toLowerCase().includes(search.toLowerCase()) ||
+      app.userEmail.toLowerCase().includes(search.toLowerCase())
+  );
+
   if (loading) return <LoadingSpinner />;
 
   return (
     <div className="p-4">
-      <h2 className="text-3xl font-bold text-primary mb-6">
-        Approved Loan Applications
-      </h2>
+      <div className="flex flex-col md:flex-row justify-between items-center mb-6">
+        <h2 className="text-3xl font-bold text-primary">
+          Approved Loan Applications
+        </h2>
+
+        <input
+          type="text"
+          placeholder="Search by title, category, or user"
+          className="input input-bordered mt-3 md:mt-0"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+      </div>
 
       <div className="overflow-x-auto">
         <table className="table table-zebra w-full">
@@ -67,7 +95,15 @@ const ApprovedLoans = () => {
           </thead>
 
           <tbody>
-            {apps.map((app) => (
+            {filteredApps.length === 0 && (
+              <tr>
+                <td colSpan="6" className="text-center py-6">
+                  No approved applications found
+                </td>
+              </tr>
+            )}
+
+            {filteredApps.map((app) => (
               <tr key={app._id}>
                 <td>{app._id.slice(0, 6)}...</td>
                 <td>
@@ -87,14 +123,6 @@ const ApprovedLoans = () => {
                 </td>
               </tr>
             ))}
-
-            {apps.length === 0 && (
-              <tr>
-                <td colSpan="6" className="text-center py-6">
-                  No approved applications
-                </td>
-              </tr>
-            )}
           </tbody>
         </table>
       </div>

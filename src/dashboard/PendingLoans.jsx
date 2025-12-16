@@ -1,3 +1,4 @@
+// src/dashboard/PendingLoans.jsx
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import useAxiosSecure from "../hooks/useAxiosSecure";
@@ -5,25 +6,32 @@ import LoadingSpinner from "../components/LoadingSpinner";
 
 const PendingLoans = () => {
   const axiosSecure = useAxiosSecure();
-  const [apps, setApps] = useState([]);
+  const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchApps = async () => {
+  // =====================
+  // Fetch pending applications
+  // =====================
+  const fetchApplications = async () => {
     try {
       setLoading(true);
       const res = await axiosSecure.get("/manager/pending");
-      setApps(res.data);
+      setApplications(res.data);
     } catch (error) {
-      Swal.fire("Error", "Failed to fetch applications", "error");
+      console.error(error);
+      Swal.fire("Error", "Failed to fetch pending applications", "error");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchApps();
+    fetchApplications();
   }, []);
 
+  // =====================
+  // Approve loan
+  // =====================
   const handleApprove = async (id) => {
     const confirm = await Swal.fire({
       title: "Approve Loan?",
@@ -34,10 +42,13 @@ const PendingLoans = () => {
     if (confirm.isConfirmed) {
       await axiosSecure.patch(`/manager/approve/${id}`);
       Swal.fire("Approved!", "Loan approved successfully", "success");
-      fetchApps();
+      fetchApplications();
     }
   };
 
+  // =====================
+  // Reject loan
+  // =====================
   const handleReject = async (id) => {
     const confirm = await Swal.fire({
       title: "Reject Loan?",
@@ -48,10 +59,13 @@ const PendingLoans = () => {
     if (confirm.isConfirmed) {
       await axiosSecure.patch(`/manager/reject/${id}`);
       Swal.fire("Rejected!", "Loan rejected successfully", "error");
-      fetchApps();
+      fetchApplications();
     }
   };
 
+  // =====================
+  // View loan details
+  // =====================
   const handleView = (app) => {
     Swal.fire({
       title: "Loan Application Details",
@@ -63,9 +77,7 @@ const PendingLoans = () => {
           <p><b>Category:</b> ${app.loanCategory}</p>
           <p><b>Amount:</b> $${app.loanAmount}</p>
           <p><b>Status:</b> ${app.status}</p>
-          <p><b>Applied Date:</b> ${new Date(
-            app.createdAt
-          ).toLocaleDateString()}</p>
+          <p><b>Applied Date:</b> ${new Date(app.createdAt).toLocaleDateString()}</p>
           <p><b>Address:</b> ${app.address}</p>
           <p><b>Reason:</b> ${app.reason}</p>
         </div>
@@ -95,7 +107,15 @@ const PendingLoans = () => {
           </thead>
 
           <tbody>
-            {apps.map((app) => (
+            {applications.length === 0 && (
+              <tr>
+                <td colSpan="6" className="text-center py-6">
+                  No pending applications
+                </td>
+              </tr>
+            )}
+
+            {applications.map((app) => (
               <tr key={app._id}>
                 <td>{app._id.slice(0, 6)}...</td>
                 <td>
@@ -127,14 +147,6 @@ const PendingLoans = () => {
                 </td>
               </tr>
             ))}
-
-            {apps.length === 0 && (
-              <tr>
-                <td colSpan="6" className="text-center py-6">
-                  No pending applications
-                </td>
-              </tr>
-            )}
           </tbody>
         </table>
       </div>

@@ -1,27 +1,24 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import { toast } from "react-toastify";
+import useAxiosSecure from "../hooks/useAxiosSecure";
 
 const MySwal = withReactContent(Swal);
 
 const ManageUsers = () => {
+  const axiosSecure = useAxiosSecure();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const token = localStorage.getItem("token"); // JWT from login
-
-  // ===============================
-  // Fetch All Users
-  // ===============================
+  // =====================
+  // Fetch Users
+  // =====================
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const res = await axios.get("http://localhost:3000/users", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setUsers(res.data.users);
+      const res = await axiosSecure.get("/users");
+      setUsers(res.data.users || res.data); // support different response shapes
     } catch (err) {
       console.error(err);
       toast.error("Failed to fetch users");
@@ -34,9 +31,9 @@ const ManageUsers = () => {
     fetchUsers();
   }, []);
 
-  // ===============================
-  // Update User Role
-  // ===============================
+  // =====================
+  // Update Role
+  // =====================
   const handleRoleUpdate = async (userId, currentRole) => {
     const { value: newRole } = await MySwal.fire({
       title: "Select new role",
@@ -53,11 +50,7 @@ const ManageUsers = () => {
     if (!newRole) return;
 
     try {
-      await axios.patch(
-        `http://localhost:3000/users/role/${userId}`,
-        { role: newRole },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await axiosSecure.patch(`/users/role/${userId}`, { role: newRole });
       toast.success("Role updated successfully");
       fetchUsers();
     } catch (err) {
@@ -66,25 +59,24 @@ const ManageUsers = () => {
     }
   };
 
-  // ===============================
-  // Suspend / Unsuspend User
-  // ===============================
+  // =====================
+  // Suspend / Unsuspend
+  // =====================
   const handleSuspend = async (user) => {
-    const { value: reason } = await MySwal.fire({
-      title: user.suspended ? "Unsuspend User?" : "Suspend User?",
-      input: user.suspended ? null : "textarea",
-      inputPlaceholder: "Enter reason for suspension...",
-      showCancelButton: true,
-    });
-
     if (user.suspended) {
       // Unsuspend
+      const confirm = await MySwal.fire({
+        title: "Unsuspend User?",
+        showCancelButton: true,
+        confirmButtonText: "Yes, Unsuspend",
+      });
+      if (!confirm.isConfirmed) return;
+
       try {
-        await axios.patch(
-          `http://localhost:3000/users/suspend/${user._id}`,
-          { suspended: false, reason: "" },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+        await axiosSecure.patch(`/users/suspend/${user._id}`, {
+          suspended: false,
+          reason: "",
+        });
         toast.success("User unsuspended");
         fetchUsers();
       } catch (err) {
@@ -94,20 +86,49 @@ const ManageUsers = () => {
       return;
     }
 
+    // Suspend
+    const { value: reason } = await MySwal.fire({
+      title: "Suspend User?",
+      input: "textarea",
+      inputPlaceholder: "Enter reason for suspension...",
+      showCancelButton: true,
+    });
     if (!reason) return;
 
-    // Suspend
     try {
-      await axios.patch(
-        `http://localhost:3000/users/suspend/${user._id}`,
-        { suspended: true, reason },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await axiosSecure.patch(`/users/suspend/${user._id}`, {
+        suspended: true,
+        reason,
+      });
       toast.success("User suspended successfully");
       fetchUsers();
     } catch (err) {
       console.error(err);
       toast.error("Failed to suspend user");
+    }
+  };
+
+  // =====================
+  // Delete User
+  // =====================
+  const handleDelete = async (id) => {
+    const confirm = await MySwal.fire({
+      title: "Delete User?",
+      text: "This action cannot be undone",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, delete",
+    });
+
+    if (!confirm.isConfirmed) return;
+
+    try {
+      await axiosSecure.delete(`/users/${id}`);
+      toast.success("User deleted successfully");
+      setUsers(users.filter((u) => u._id !== id));
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to delete user");
     }
   };
 
@@ -160,6 +181,12 @@ const ManageUsers = () => {
                     onClick={() => handleSuspend(user)}
                   >
                     {user.suspended ? "Unsuspend" : "Suspend"}
+                  </button>
+                  <button
+                    className="btn btn-sm btn-warning"
+                    onClick={() => handleDelete(user._id)}
+                  >
+                    Delete
                   </button>
                 </td>
               </tr>

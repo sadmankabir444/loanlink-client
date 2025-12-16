@@ -4,8 +4,7 @@ import { createBrowserRouter } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout";
 import DashboardLayout from "../layouts/DashboardLayout";
 
-
-/* Pages (Public) */
+/* Pages */
 import Home from "../pages/Home";
 import AllLoans from "../pages/AllLoans";
 import Login from "../pages/Login";
@@ -20,10 +19,15 @@ import PendingLoans from "../dashboard/PendingLoans";
 import ManageUsers from "../dashboard/ManageUsers";
 import AdminLoans from "../dashboard/AdminLoans";
 import Applications from "../dashboard/Applications";
+import AddLoan from "../dashboard/AddLoan";
+import ManageLoans from "../dashboard/ManageLoans";
+import ApprovedLoans from "../dashboard/ApprovedLoans";
+import Profile from "../dashboard/Profile";
+import DashboardHome from "../dashboard/DashboardHome";
 
-/* Route Guards */
+
+/* Guard */
 import PrivateRoute from "../components/PrivateRoute";
-import AdminRoute from "../components/AdminRoute";
 
 const router = createBrowserRouter([
   {
@@ -31,31 +35,22 @@ const router = createBrowserRouter([
     element: <MainLayout />,
     errorElement: <ErrorPage />,
     children: [
-      /* ---------- Public Routes ---------- */
+      // ---------- PUBLIC ----------
       { index: true, element: <Home /> },
       { path: "loans", element: <AllLoans /> },
       { path: "login", element: <Login /> },
       { path: "register", element: <Register /> },
 
-      /* ---------- Protected Public Routes ---------- */
+      // ---------- AUTH ----------
       {
-        path: "loan/:id",
-        element: (
-          <PrivateRoute>
-            <LoanDetails />
-          </PrivateRoute>
-        ),
-      },
-      {
-        path: "apply-loan/:id",
-        element: (
-          <PrivateRoute>
-            <ApplyLoan />
-          </PrivateRoute>
-        ),
+        element: <PrivateRoute />,
+        children: [
+          { path: "loans/:id", element: <LoanDetails /> },
+          { path: "apply-loan/:id", element: <ApplyLoan /> },
+        ],
       },
 
-      /* ---------- DASHBOARD ---------- */
+      // ---------- DASHBOARD ----------
       {
         path: "dashboard",
         element: (
@@ -64,41 +59,89 @@ const router = createBrowserRouter([
           </PrivateRoute>
         ),
         children: [
-          /* Borrower */
-          {
-            index: true,
-            element: <MyLoans />,
-          },
+          // 🔑 default dashboard page
+           {
+      index: true,
+      element: <DashboardHome />,
+    },
+
+          // Borrower
           {
             path: "my-loans",
-            element: <MyLoans />,
+            element: (
+              <PrivateRoute allowedRoles={["borrower"]}>
+                <MyLoans />
+              </PrivateRoute>
+            ),
           },
 
-          /* Manager */
+          // Shared
+          {
+            path: "profile",
+            element: (
+              <PrivateRoute allowedRoles={["borrower", "manager", "admin"]}>
+                <Profile />
+              </PrivateRoute>
+            ),
+          },
+
+          // Manager
+          {
+            path: "add-loan",
+            element: (
+              <PrivateRoute allowedRoles={["manager"]}>
+                <AddLoan />
+              </PrivateRoute>
+            ),
+          },
+          {
+            path: "manage-loans",
+            element: (
+              <PrivateRoute allowedRoles={["manager"]}>
+                <ManageLoans />
+              </PrivateRoute>
+            ),
+          },
           {
             path: "pending-loans",
-            element: <PendingLoans />,
+            element: (
+              <PrivateRoute allowedRoles={["manager"]}>
+                <PendingLoans />
+              </PrivateRoute>
+            ),
           },
           {
-            path: "applications",
-            element: <Applications />,
+            path: "approved-loans",
+            element: (
+              <PrivateRoute allowedRoles={["manager"]}>
+                <ApprovedLoans />
+              </PrivateRoute>
+            ),
           },
 
-          /* Admin Only */
+          // Admin
           {
             path: "manage-users",
             element: (
-              <AdminRoute>
+              <PrivateRoute allowedRoles={["admin"]}>
                 <ManageUsers />
-              </AdminRoute>
+              </PrivateRoute>
             ),
           },
           {
             path: "all-loans",
             element: (
-              <AdminRoute>
+              <PrivateRoute allowedRoles={["admin"]}>
                 <AdminLoans />
-              </AdminRoute>
+              </PrivateRoute>
+            ),
+          },
+          {
+            path: "applications",
+            element: (
+              <PrivateRoute allowedRoles={["admin"]}>
+                <Applications />
+              </PrivateRoute>
             ),
           },
         ],

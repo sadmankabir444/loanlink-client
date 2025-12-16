@@ -12,35 +12,20 @@ import {
 import app from "../firebase/firebase.config";
 import axios from "axios";
 
-// =======================
-// Context & Firebase Init
-// =======================
 export const AuthContext = createContext(null);
 
 const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
 
-// =======================
-// Auth Provider
-// =======================
 const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // =======================
-  // REGISTER (Email & Password)
-  // =======================
+  // ================= REGISTER =================
   const register = async (email, password) => {
     setLoading(true);
+    const result = await createUserWithEmailAndPassword(auth, email, password);
 
-    // Firebase register
-    const result = await createUserWithEmailAndPassword(
-      auth,
-      email,
-      password
-    );
-
-    // Save user to backend (MongoDB)
     await axios.post("http://localhost:3000/users", {
       email,
       role: "borrower",
@@ -49,20 +34,12 @@ const AuthProvider = ({ children }) => {
     return result;
   };
 
-  // =======================
-  // LOGIN (Email & Password)
-  // =======================
+  // ================= LOGIN =================
   const login = async (email, password) => {
     setLoading(true);
 
-    // Firebase login
-    const result = await signInWithEmailAndPassword(
-      auth,
-      email,
-      password
-    );
+    const result = await signInWithEmailAndPassword(auth, email, password);
 
-    // Backend JWT cookie login
     await axios.post(
       "http://localhost:3000/login",
       { email, password },
@@ -72,16 +49,13 @@ const AuthProvider = ({ children }) => {
     return result;
   };
 
-  // =======================
-  // GOOGLE LOGIN
-  // =======================
+  // ================= GOOGLE LOGIN =================
   const googleLogin = async () => {
     setLoading(true);
 
     const result = await signInWithPopup(auth, googleProvider);
     const gUser = result.user;
 
-    // Save Google user to backend
     await axios.post("http://localhost:3000/users", {
       email: gUser.email,
       name: gUser.displayName,
@@ -92,19 +66,17 @@ const AuthProvider = ({ children }) => {
     return result;
   };
 
-  // =======================
-  // UPDATE PROFILE
-  // =======================
-  const updateUserProfile = (name, photoURL) => {
+  // ================= UPDATE PROFILE =================
+  const updateUserProfile = async (name, photoURL) => {
+    if (!auth.currentUser) return;
+
     return updateProfile(auth.currentUser, {
       displayName: name,
       photoURL,
     });
   };
 
-  // =======================
-  // LOGOUT
-  // =======================
+  // ================= LOGOUT =================
   const logout = async () => {
     setLoading(true);
     await signOut(auth);
@@ -112,21 +84,35 @@ const AuthProvider = ({ children }) => {
     setLoading(false);
   };
 
-  // =======================
-  // AUTH STATE OBSERVER
-  // =======================
+  // ================= AUTH OBSERVER =================
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, currentUser => {
-      setUser(currentUser);
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (currentUser) {
+        try {
+          const res = await axios.get(
+            `http://localhost:3000/users/${currentUser.email}`
+          );
+
+          setUser({
+            ...currentUser,
+            role: res.data?.role || "borrower",
+          });
+        } catch (err) {
+          console.error("Failed to fetch role", err);
+          setUser({
+            ...currentUser,
+            role: "borrower",
+          });
+        }
+      } else {
+        setUser(null);
+      }
       setLoading(false);
     });
 
     return () => unsubscribe();
   }, []);
 
-  // =======================
-  // CONTEXT VALUE
-  // =======================
   const authInfo = {
     user,
     loading,
@@ -138,9 +124,7 @@ const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={authInfo}>
-      {children}
-    </AuthContext.Provider>
+    <AuthContext.Provider value={authInfo}>{children}</AuthContext.Provider>
   );
 };
 

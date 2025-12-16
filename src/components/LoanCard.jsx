@@ -28,7 +28,7 @@ const LoanCard = ({ loan }) => {
         </div>
 
         <div className="card-actions justify-end mt-4">
-          <Link to={`/loan/${_id}`} className="btn btn-primary btn-sm">
+          <Link to={`/loans/${_id}`} className="btn btn-primary btn-sm">
             View Details
           </Link>
         </div>

@@ -9,6 +9,8 @@ const Applications = () => {
   const [status, setStatus] = useState("all");
   const [loading, setLoading] = useState(true);
 
+  const [search, setSearch] = useState("");
+
   // pagination
   const [page, setPage] = useState(1);
   const limit = 5;
@@ -34,7 +36,6 @@ const Applications = () => {
     fetchApplications();
   }, [status, page]);
 
-  // view details modal
   const handleView = (app) => {
     Swal.fire({
       title: "Loan Application Details",
@@ -56,24 +57,41 @@ const Applications = () => {
 
   if (loading) return <LoadingSpinner />;
 
+  const filteredApplications = applications.filter(
+    (app) =>
+      app.userName.toLowerCase().includes(search.toLowerCase()) ||
+      app.loanTitle.toLowerCase().includes(search.toLowerCase())
+  );
+
   return (
     <div className="space-y-6">
       {/* header */}
-      <div className="flex flex-col md:flex-row justify-between gap-4">
+      <div className="flex flex-col md:flex-row justify-between gap-4 items-center">
         <h2 className="text-3xl font-bold text-primary">Loan Applications</h2>
-        <select
-          className="select select-bordered w-full md:w-56"
-          value={status}
-          onChange={(e) => {
-            setStatus(e.target.value);
-            setPage(1);
-          }}
-        >
-          <option value="all">All Applications</option>
-          <option value="Pending">Pending</option>
-          <option value="Approved">Approved</option>
-          <option value="Rejected">Rejected</option>
-        </select>
+
+        <div className="flex gap-2 flex-col md:flex-row w-full md:w-auto">
+          <select
+            className="select select-bordered w-full md:w-56"
+            value={status}
+            onChange={(e) => {
+              setStatus(e.target.value);
+              setPage(1);
+            }}
+          >
+            <option value="all">All Applications</option>
+            <option value="Pending">Pending</option>
+            <option value="Approved">Approved</option>
+            <option value="Rejected">Rejected</option>
+          </select>
+
+          <input
+            type="text"
+            placeholder="Search by name or title"
+            className="input input-bordered w-full md:w-64"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
       </div>
 
       {/* table */}
@@ -90,7 +108,7 @@ const Applications = () => {
             </tr>
           </thead>
           <tbody>
-            {applications.map((app) => (
+            {filteredApplications.map((app) => (
               <tr key={app._id}>
                 <td>{app._id.slice(0, 6)}...</td>
                 <td>
@@ -122,7 +140,8 @@ const Applications = () => {
                 </td>
               </tr>
             ))}
-            {applications.length === 0 && (
+
+            {filteredApplications.length === 0 && (
               <tr>
                 <td colSpan="6" className="text-center py-8">
                   No applications found

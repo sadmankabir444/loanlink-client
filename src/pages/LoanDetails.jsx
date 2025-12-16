@@ -1,43 +1,66 @@
-import { useContext, useEffect, useState } from "react";
+// src/pages/LoanDetails.jsx
+import { useEffect, useState, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { AuthContext } from "../providers/AuthProvider";
 import { motion } from "framer-motion";
+import Swal from "sweetalert2";
+
+import useAxiosSecure from "../hooks/useAxiosSecure";
+import LoadingSpinner from "../components/LoadingSpinner";
+import { AuthContext } from "../providers/AuthProvider";
 
 const LoanDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user, loading } = useContext(AuthContext);
+  const { user, loading: authLoading } = useContext(AuthContext);
+  const axiosSecure = useAxiosSecure();
 
   const [loan, setLoan] = useState(null);
   const [role, setRole] = useState("");
   const [pageLoading, setPageLoading] = useState(true);
 
+  // =====================
+  // Fetch loan & user role
+  // =====================
   useEffect(() => {
+    
     if (!user?.email) return;
 
     setPageLoading(true);
 
-    Promise.all([
-      fetch(`http://localhost:3000/loans/${id}`).then(res => res.json()),
-      fetch(`http://localhost:3000/users/${user.email}`).then(res => res.json())
-    ])
-      .then(([loanData, userData]) => {
-        setLoan(loanData);
-        setRole(userData?.role || "");
-      })
-      .finally(() => setPageLoading(false));
-  }, [id, user]);
+    const fetchData = async () => {
+      try {
+        const [loanRes, userRes] = await Promise.all([
+          axiosSecure.get(`/loans/${id}`),
+          axiosSecure.get(`/users/${user.email}`),
+        ]);
 
-  // ================= LOADING =================
-  if (loading || pageLoading) {
+        setLoan(loanRes.data);
+        setRole(userRes.data?.role || "");
+      } catch (err) {
+        console.error(err);
+        Swal.fire("Error", "Failed to fetch loan details", "error");
+      } finally {
+        setPageLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [id, user, axiosSecure]);
+
+  // =====================
+  // Loading state
+  // =====================
+  if (authLoading || pageLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <span className="loading loading-spinner loading-lg"></span>
+        <LoadingSpinner />
       </div>
     );
   }
 
-  // ================= NOT FOUND =================
+  // =====================
+  // Loan not found
+  // =====================
   if (!loan?._id) {
     return (
       <div className="text-center mt-24">
