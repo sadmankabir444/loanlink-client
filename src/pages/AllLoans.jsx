@@ -9,7 +9,7 @@ const AllLoans = () => {
   useEffect(() => {
     const fetchLoans = async () => {
       try {
-        const res = await fetch("http://localhost:3000/loans");
+        const res = await fetch("https://loanlink-server-seven.vercel.app/loans");
         if (!res.ok) {
           throw new Error("Failed to fetch loans");
         }

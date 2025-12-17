@@ -10,9 +10,7 @@ const ManageLoans = () => {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
 
-  // =====================
   // Fetch Loans
-  // =====================
   const fetchLoans = async () => {
     try {
       setLoading(true);
@@ -26,7 +24,7 @@ const ManageLoans = () => {
     }
   };
 
-  // ✅ Fix-2B applied: empty dependency to prevent double API calls
+  
   useEffect(() => {
     fetchLoans();
   }, []);

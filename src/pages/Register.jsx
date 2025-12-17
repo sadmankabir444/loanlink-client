@@ -35,7 +35,7 @@ const Register = () => {
     try {
       setLoading(true);
 
-      // ✅ FIX: pass name + email + password
+      
       await register(name, email, password);
 
       // Update Firebase profile

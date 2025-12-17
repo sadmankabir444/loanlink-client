@@ -7,7 +7,7 @@ const AdminRoute = ({ children }) => {
   const [role, setRole] = useState("");
 
   useEffect(() => {
-    fetch(`http://localhost:3000/users/${user.email}`)
+    fetch(`https://loanlink-server-seven.vercel.app/users/${user.email}`)
       .then(res => res.json())
       .then(data => setRole(data.role));
   }, [user]);

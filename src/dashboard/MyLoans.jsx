@@ -11,9 +11,9 @@ const MyLoans = () => {
   const [loans, setLoans] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // =====================
+  
   // Fetch Loans
-  // =====================
+  
   const fetchLoans = async () => {
     if (!user?.email) return;
     try {
@@ -32,9 +32,9 @@ const MyLoans = () => {
     fetchLoans();
   }, [user]);
 
-  // =====================
+  
   // Cancel Loan
-  // =====================
+  
   const handleCancel = async (id) => {
     const confirm = await Swal.fire({
       title: "Cancel Loan?",
@@ -50,9 +50,9 @@ const MyLoans = () => {
     }
   };
 
-  // =====================
+  
   // Pay Application Fee
-  // =====================
+  
   const handlePay = async (loan) => {
     const confirm = await Swal.fire({
       title: "Pay application fee?",
@@ -69,9 +69,9 @@ const MyLoans = () => {
     }
   };
 
-  // =====================
+  
   // View Payment Info
-  // =====================
+  
   const handleViewPayment = (loan) => {
     Swal.fire({
       title: "Payment Details",

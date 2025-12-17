@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import { FaEye, FaEyeSlash, FaGoogle } from "react-icons/fa";
-import useAuth from "../hooks/useAuth"; // ✅ default import
+import useAuth from "../hooks/useAuth"; 
 import axiosSecure from "../api/axiosSecure";
 
 export default function Login() {
@@ -23,21 +23,21 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
     try {
-      // 1️⃣ Firebase login
+      
       const result = await login(email, password);
       const user = result.user;
 
-      // 2️⃣ Backend JWT login
+      
       try {
         await axiosSecure.post("/login", { email: user.email });
       } catch (err) {
         console.error("Backend login failed", err);
-        // ignore, firebase login succeeded
+        
       }
 
       toast.success("Login successful 🎉");
 
-      // clear inputs
+      
       setEmail("");
       setPassword("");
 
@@ -59,10 +59,10 @@ export default function Login() {
       const result = await googleLogin();
       const gUser = result.user;
 
-      // backend already called in AuthProvider, ignore COOP errors
+      
       toast.success("Google login successful 🎉");
 
-      // clear inputs
+      
       setEmail("");
       setPassword("");
 

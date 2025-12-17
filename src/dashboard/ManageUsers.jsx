@@ -17,8 +17,8 @@ const ManageUsers = () => {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const res = await axiosSecure.get("/users");
-      setUsers(res.data.users || res.data); // support different response shapes
+      const res = await axiosSecure.get("/admin/users"); // ✅ fixed
+      setUsers(res.data.users || res.data);
     } catch (err) {
       console.error(err);
       toast.error("Failed to fetch users");
@@ -50,7 +50,9 @@ const ManageUsers = () => {
     if (!newRole) return;
 
     try {
-      await axiosSecure.patch(`/users/role/${userId}`, { role: newRole });
+      await axiosSecure.patch(`/admin/users/role/${userId}`, { // ✅ fixed
+        role: newRole,
+      });
       toast.success("Role updated successfully");
       fetchUsers();
     } catch (err) {
@@ -64,7 +66,6 @@ const ManageUsers = () => {
   // =====================
   const handleSuspend = async (user) => {
     if (user.suspended) {
-      // Unsuspend
       const confirm = await MySwal.fire({
         title: "Unsuspend User?",
         showCancelButton: true,
@@ -73,7 +74,7 @@ const ManageUsers = () => {
       if (!confirm.isConfirmed) return;
 
       try {
-        await axiosSecure.patch(`/users/suspend/${user._id}`, {
+        await axiosSecure.patch(`/admin/users/suspend/${user._id}`, {
           suspended: false,
           reason: "",
         });
@@ -86,7 +87,6 @@ const ManageUsers = () => {
       return;
     }
 
-    // Suspend
     const { value: reason } = await MySwal.fire({
       title: "Suspend User?",
       input: "textarea",
@@ -96,7 +96,7 @@ const ManageUsers = () => {
     if (!reason) return;
 
     try {
-      await axiosSecure.patch(`/users/suspend/${user._id}`, {
+      await axiosSecure.patch(`/admin/users/suspend/${user._id}`, {
         suspended: true,
         reason,
       });
@@ -123,7 +123,7 @@ const ManageUsers = () => {
     if (!confirm.isConfirmed) return;
 
     try {
-      await axiosSecure.delete(`/users/${id}`);
+      await axiosSecure.delete(`/admin/users/${id}`); // ✅ fixed
       toast.success("User deleted successfully");
       setUsers(users.filter((u) => u._id !== id));
     } catch (err) {

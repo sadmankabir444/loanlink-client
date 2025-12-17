@@ -9,9 +9,9 @@ const ApprovedLoans = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
-  // =====================
+  
   // Fetch Approved Loans
-  // =====================
+  
   const fetchApps = async () => {
     try {
       setLoading(true);
@@ -24,14 +24,14 @@ const ApprovedLoans = () => {
     }
   };
 
-  // ✅ Fix-2B applied: empty dependency array
+  
   useEffect(() => {
     fetchApps();
   }, []);
 
-  // =====================
+  
   // View Details
-  // =====================
+  
   const handleView = (app) => {
     Swal.fire({
       title: "Approved Loan Details",
@@ -53,9 +53,9 @@ const ApprovedLoans = () => {
     });
   };
 
-  // =====================
+  
   // Filtered Loans
-  // =====================
+  
   const filteredApps = apps.filter(
     (app) =>
       app.loanTitle.toLowerCase().includes(search.toLowerCase()) ||

@@ -13,7 +13,7 @@ const ApplyLoan = () => {
 
   // Fetch loan details
   useEffect(() => {
-    fetch(`http://localhost:3000/loans/${id}`)
+    fetch(`https://loanlink-server-seven.vercel.app/loans/${id}`)
       .then(res => res.json())
       .then(data => setLoan(data))
       .catch(err => toast.error("Failed to fetch loan details"));
@@ -48,7 +48,7 @@ const ApplyLoan = () => {
     };
 
     try {
-      const res = await fetch("http://localhost:3000/loan-applications", {
+      const res = await fetch("https://loanlink-server-seven.vercel.app/loan-applications", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(application),

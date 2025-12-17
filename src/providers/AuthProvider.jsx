@@ -30,7 +30,7 @@ const AuthProvider = ({ children }) => {
 
       // Save user to backend with name, email, role
       try {
-        await axios.post("http://localhost:3000/users", {
+        await axios.post("https://loanlink-server-seven.vercel.app/users", {
           name,       // <-- important: save name
           email,
           role: "borrower",
@@ -51,10 +51,10 @@ const AuthProvider = ({ children }) => {
     try {
       const result = await signInWithEmailAndPassword(auth, email, password);
 
-      // backend login (ignore errors)
+      
       try {
         await axios.post(
-          "http://localhost:3000/login",
+          "https://loanlink-server-seven.vercel.app/login",
           { email, password },
           { withCredentials: true }
         );
@@ -77,7 +77,7 @@ const AuthProvider = ({ children }) => {
 
       // Save Google user to backend
       try {
-        await axios.post("http://localhost:3000/users", {
+        await axios.post("https://loanlink-server-seven.vercel.app/users", {
           name: gUser.displayName,
           email: gUser.email,
           photo: gUser.photoURL,
@@ -113,7 +113,7 @@ const AuthProvider = ({ children }) => {
       if (currentUser) {
         try {
           const res = await axios.get(
-            `http://localhost:3000/users/${currentUser.email}`
+            `https://loanlink-server-seven.vercel.app/users/${currentUser.email}`
           );
           setUser({ ...currentUser, role: res.data?.role || "borrower" });
         } catch (err) {

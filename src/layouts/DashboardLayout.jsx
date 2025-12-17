@@ -1,7 +1,3 @@
-console.log("🔥 DashboardLayout rendered");
-
-
-
 
 import { Outlet, NavLink } from "react-router-dom";
 import { useContext } from "react";

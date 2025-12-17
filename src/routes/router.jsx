@@ -59,7 +59,7 @@ const router = createBrowserRouter([
           </PrivateRoute>
         ),
         children: [
-          // 🔑 default dashboard page
+          // default dashboard page
            {
       index: true,
       element: <DashboardHome />,

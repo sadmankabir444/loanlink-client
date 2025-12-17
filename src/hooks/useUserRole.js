@@ -16,7 +16,7 @@ const useUserRole = (email) => {
         setRole(userData?.role || "borrower");
       } catch (err) {
         console.error("Failed to fetch user role:", err);
-        setRole("borrower"); // fallback
+        setRole("borrower"); 
       } finally {
         setLoading(false);
       }

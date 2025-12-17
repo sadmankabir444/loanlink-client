@@ -8,7 +8,7 @@ const AllLoansAdmin = () => {
   const [loans, setLoans] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // 🔄 Fetch all loans
+  // Fetch all loans
   const fetchLoans = async () => {
     try {
       setLoading(true);
@@ -25,7 +25,7 @@ const AllLoansAdmin = () => {
     fetchLoans();
   }, []);
 
-  // 🏠 Toggle Show on Home
+  // Toggle Show on Home
   const handleToggleHome = async (loanId, currentValue) => {
     try {
       await axiosSecure.patch(`/admin/loan/show-home/${loanId}`, {
@@ -37,7 +37,7 @@ const AllLoansAdmin = () => {
     }
   };
 
-  // ✏️ Update Loan
+  // Update Loan
   const handleUpdate = async (loan) => {
     const { value: formData } = await Swal.fire({
       title: "Update Loan",

@@ -43,7 +43,7 @@ const Home = () => {
   useEffect(() => {
     const fetchLoans = async () => {
       try {
-        const res = await fetch("http://localhost:3000/loans?limit=6");
+        const res = await fetch("https://loanlink-server-seven.vercel.app/loans?limit=6");
         if (!res.ok) throw new Error("Failed to fetch loans");
         const data = await res.json();
         setLoans(data);
@@ -237,7 +237,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* ================= CTA (FOOTER BEFORE) ================= */}
+      {/* ================= (FOOTER BEFORE) ================= */}
       <section className="py-20 text-center bg-gradient-to-b from-indigo-600 to-purple-700 dark:from-indigo-800 dark:to-purple-900 text-white transition-colors">
         <h2 className="text-3xl md:text-4xl font-bold mb-4">
           Start Your Loan Journey Today

@@ -1,13 +1,13 @@
 import axios from "axios";
 
 const axiosSecure = axios.create({
-  baseURL: "http://localhost:3000",
+  baseURL: "https://loanlink-server-seven.vercel.app",
   withCredentials: true,
 });
 
 axiosSecure.interceptors.request.use(
   (config) => {
-    // cookie already handled by browser
+    
     return config;
   },
   (error) => Promise.reject(error)

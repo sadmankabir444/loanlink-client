@@ -26,8 +26,7 @@ const PrivateRoute = ({ children, allowedRoles }) => {
   }
 
   // ✅ IMPORTANT PART
-  // children থাকলে children দেখাও
-  // না থাকলে nested route এর জন্য Outlet দেখাও
+  
   return children ? children : <Outlet />;
 };
 

@@ -1,4 +1,3 @@
-// src/dashboard/Applications.jsx
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import useAxiosSecure from "../hooks/useAxiosSecure";
@@ -37,7 +36,7 @@ const Applications = () => {
 
   useEffect(() => {
     fetchApplications();
-    // ⚠️ IMPORTANT: dependency limited
+    // IMPORTANT: dependency limited
   }, [status, page]);
 
   const handleView = (app) => {
