@@ -53,11 +53,17 @@ const AuthProvider = ({ children }) => {
 
       
       try {
-        await axios.post(
-          "https://loanlink-server-seven.vercel.app/login",
-          { email, password },
-          { withCredentials: true }
-        );
+        const res = await axios.post(
+  "https://loanlink-server-seven.vercel.app/login",
+  { email, password },
+  { withCredentials: true }
+);
+
+// ✅ token save
+if (res.data?.token) {
+  localStorage.setItem("access-token", res.data.token);
+}
+
       } catch (err) {
         console.error("Backend login failed, ignoring since Firebase login succeeded", err);
       }

@@ -1,35 +1,49 @@
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
+// Axios instance
 const axiosSecure = axios.create({
   baseURL: "https://loanlink-server-seven.vercel.app",
-  withCredentials: true,
+  withCredentials: true, 
 });
 
-axiosSecure.interceptors.request.use(
-  (config) => {
+const useAxiosSecure = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
     
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
+    const requestInterceptor = axiosSecure.interceptors.request.use(
+      (config) => {
+        config.withCredentials = true;
+        return config;
+      },
+      (error) => Promise.reject(error)
+    );
 
-axiosSecure.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    const status = error.response?.status;
+    
+    const responseInterceptor = axiosSecure.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        const status = error.response?.status;
 
-    if (status === 401) {
-      console.log("❌ Unauthorized");
-    }
+        if (status === 401 || status === 403) {
+          console.log("❌ Unauthorized");
+          navigate("/login", { replace: true });
+        }
 
-    if (status === 403) {
-      console.log("⛔ Forbidden");
-    }
+        return Promise.reject(error);
+      }
+    );
 
-    return Promise.reject(error);
-  }
-);
+    // cleanup
+    return () => {
+      axiosSecure.interceptors.request.eject(requestInterceptor);
+      axiosSecure.interceptors.response.eject(responseInterceptor);
+    };
+  }, [navigate]);
 
-const useAxiosSecure = () => axiosSecure;
+  return axiosSecure;
+};
 
 export default useAxiosSecure;

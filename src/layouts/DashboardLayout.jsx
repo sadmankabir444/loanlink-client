@@ -1,10 +1,23 @@
-
-import { Outlet, NavLink } from "react-router-dom";
+import { Outlet, NavLink, Navigate } from "react-router-dom";
 import { useContext } from "react";
 import { AuthContext } from "../providers/AuthProvider";
 
 const DashboardLayout = () => {
-  const { user } = useContext(AuthContext);
+  const { user, loading } = useContext(AuthContext);
+
+  
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <span className="loading loading-spinner loading-lg"></span>
+      </div>
+    );
+  }
+
+  
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
 
   return (
     <div className="min-h-screen grid md:grid-cols-5">
@@ -31,13 +44,22 @@ const DashboardLayout = () => {
               <NavLink to="/dashboard/add-loan" className="block btn btn-ghost">
                 Add Loan
               </NavLink>
-              <NavLink to="/dashboard/manage-loans" className="block btn btn-ghost">
+              <NavLink
+                to="/dashboard/manage-loans"
+                className="block btn btn-ghost"
+              >
                 Manage Loans
               </NavLink>
-              <NavLink to="/dashboard/pending-loans" className="block btn btn-ghost">
+              <NavLink
+                to="/dashboard/pending-loans"
+                className="block btn btn-ghost"
+              >
                 Pending Applications
               </NavLink>
-              <NavLink to="/dashboard/approved-loans" className="block btn btn-ghost">
+              <NavLink
+                to="/dashboard/approved-loans"
+                className="block btn btn-ghost"
+              >
                 Approved Applications
               </NavLink>
               <NavLink to="/dashboard/profile" className="block btn btn-ghost">
@@ -49,13 +71,22 @@ const DashboardLayout = () => {
           {/* Admin */}
           {user?.role === "admin" && (
             <>
-              <NavLink to="/dashboard/manage-users" className="block btn btn-ghost">
+              <NavLink
+                to="/dashboard/manage-users"
+                className="block btn btn-ghost"
+              >
                 Manage Users
               </NavLink>
-              <NavLink to="/dashboard/all-loans" className="block btn btn-ghost">
+              <NavLink
+                to="/dashboard/all-loans"
+                className="block btn btn-ghost"
+              >
                 All Loans
               </NavLink>
-              <NavLink to="/dashboard/applications" className="block btn btn-ghost">
+              <NavLink
+                to="/dashboard/applications"
+                className="block btn btn-ghost"
+              >
                 Loan Applications
               </NavLink>
             </>

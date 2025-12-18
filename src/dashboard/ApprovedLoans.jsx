@@ -1,3 +1,4 @@
+// src/dashboard/ApprovedLoans.jsx
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import useAxiosSecure from "../hooks/useAxiosSecure";
@@ -9,9 +10,7 @@ const ApprovedLoans = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
-  
   // Fetch Approved Loans
-  
   const fetchApps = async () => {
     try {
       setLoading(true);
@@ -24,14 +23,11 @@ const ApprovedLoans = () => {
     }
   };
 
-  
   useEffect(() => {
     fetchApps();
   }, []);
 
-  
   // View Details
-  
   const handleView = (app) => {
     Swal.fire({
       title: "Approved Loan Details",
@@ -43,9 +39,7 @@ const ApprovedLoans = () => {
           <p><b>Category:</b> ${app.loanCategory}</p>
           <p><b>Amount:</b> $${app.loanAmount}</p>
           <p><b>Status:</b> ${app.status}</p>
-          <p><b>Approved Date:</b> ${new Date(
-            app.approvedAt
-          ).toLocaleDateString()}</p>
+          <p><b>Approved Date:</b> ${new Date(app.approvedAt).toLocaleDateString()}</p>
           <p><b>Address:</b> ${app.address}</p>
           <p><b>Reason:</b> ${app.reason}</p>
         </div>
@@ -53,9 +47,7 @@ const ApprovedLoans = () => {
     });
   };
 
-  
   // Filtered Loans
-  
   const filteredApps = apps.filter(
     (app) =>
       app.loanTitle.toLowerCase().includes(search.toLowerCase()) ||

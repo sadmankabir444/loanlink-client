@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import toast from "react-hot-toast";
 import useAxiosSecure from "../hooks/useAxiosSecure";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 const ManageLoans = () => {
   const axiosSecure = useAxiosSecure();
@@ -24,14 +25,11 @@ const ManageLoans = () => {
     }
   };
 
-  
   useEffect(() => {
     fetchLoans();
   }, []);
 
-  // =====================
   // Delete Loan
-  // =====================
   const handleDelete = async (id) => {
     const confirm = await Swal.fire({
       title: "Delete Loan?",
@@ -53,18 +51,14 @@ const ManageLoans = () => {
     }
   };
 
-  // =====================
   // Filter loans by search
-  // =====================
   const filteredLoans = loans.filter(
     (loan) =>
       loan.title.toLowerCase().includes(search.toLowerCase()) ||
       loan.category.toLowerCase().includes(search.toLowerCase())
   );
 
-  if (loading) {
-    return <div className="text-center py-10">Loading...</div>;
-  }
+  if (loading) return <LoadingSpinner />;
 
   return (
     <div className="p-4">

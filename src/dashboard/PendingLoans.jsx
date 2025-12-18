@@ -9,9 +9,7 @@ const PendingLoans = () => {
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // =====================
   // Fetch pending applications
-  // =====================
   const fetchApplications = async () => {
     try {
       setLoading(true);
@@ -25,14 +23,11 @@ const PendingLoans = () => {
     }
   };
 
-  
   useEffect(() => {
     fetchApplications();
   }, []);
 
-  // =====================
   // Approve loan
-  // =====================
   const handleApprove = async (id) => {
     const confirm = await Swal.fire({
       title: "Approve Loan?",
@@ -47,9 +42,7 @@ const PendingLoans = () => {
     }
   };
 
-  // =====================
   // Reject loan
-  // =====================
   const handleReject = async (id) => {
     const confirm = await Swal.fire({
       title: "Reject Loan?",
@@ -64,9 +57,7 @@ const PendingLoans = () => {
     }
   };
 
-  // =====================
   // View loan details
-  // =====================
   const handleView = (app) => {
     Swal.fire({
       title: "Loan Application Details",
