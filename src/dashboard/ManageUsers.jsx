@@ -17,7 +17,7 @@ const ManageUsers = () => {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const res = await axiosSecure.get("/admin/users"); // ✅ fixed
+      const res = await axiosSecure.get("/admin/users");
       setUsers(res.data.users || res.data);
     } catch (err) {
       console.error(err);
@@ -36,7 +36,7 @@ const ManageUsers = () => {
   // =====================
   const handleRoleUpdate = async (userId, currentRole) => {
     const { value: newRole } = await MySwal.fire({
-      title: "Select new role",
+      title: "Change Role",
       input: "select",
       inputOptions: {
         admin: "Admin",
@@ -50,13 +50,10 @@ const ManageUsers = () => {
     if (!newRole) return;
 
     try {
-      await axiosSecure.patch(`/admin/users/role/${userId}`, { // ✅ fixed
-        role: newRole,
-      });
-      toast.success("Role updated successfully");
+      await axiosSecure.patch(`/admin/users/role/${userId}`, { role: newRole });
+      toast.success("Role updated");
       fetchUsers();
-    } catch (err) {
-      console.error(err);
+    } catch {
       toast.error("Failed to update role");
     }
   };
@@ -67,9 +64,8 @@ const ManageUsers = () => {
   const handleSuspend = async (user) => {
     if (user.suspended) {
       const confirm = await MySwal.fire({
-        title: "Unsuspend User?",
+        title: "Unsuspend user?",
         showCancelButton: true,
-        confirmButtonText: "Yes, Unsuspend",
       });
       if (!confirm.isConfirmed) return;
 
@@ -80,17 +76,16 @@ const ManageUsers = () => {
         });
         toast.success("User unsuspended");
         fetchUsers();
-      } catch (err) {
-        console.error(err);
+      } catch {
         toast.error("Failed to unsuspend user");
       }
       return;
     }
 
     const { value: reason } = await MySwal.fire({
-      title: "Suspend User?",
+      title: "Suspend user",
       input: "textarea",
-      inputPlaceholder: "Enter reason for suspension...",
+      inputPlaceholder: "Reason...",
       showCancelButton: true,
     });
     if (!reason) return;
@@ -100,10 +95,9 @@ const ManageUsers = () => {
         suspended: true,
         reason,
       });
-      toast.success("User suspended successfully");
+      toast.success("User suspended");
       fetchUsers();
-    } catch (err) {
-      console.error(err);
+    } catch {
       toast.error("Failed to suspend user");
     }
   };
@@ -113,78 +107,91 @@ const ManageUsers = () => {
   // =====================
   const handleDelete = async (id) => {
     const confirm = await MySwal.fire({
-      title: "Delete User?",
-      text: "This action cannot be undone",
+      title: "Delete user?",
+      text: "This cannot be undone",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonText: "Yes, delete",
     });
-
     if (!confirm.isConfirmed) return;
 
     try {
-      await axiosSecure.delete(`/admin/users/${id}`); // ✅ fixed
-      toast.success("User deleted successfully");
+      await axiosSecure.delete(`/admin/users/${id}`);
+      toast.success("User deleted");
       setUsers(users.filter((u) => u._id !== id));
-    } catch (err) {
-      console.error(err);
+    } catch {
       toast.error("Failed to delete user");
     }
   };
 
   if (loading)
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center text-gray-400">
         Loading...
       </div>
     );
 
-  if (!users.length)
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        No users found
-      </div>
-    );
-
   return (
-    <div className="max-w-6xl mx-auto mt-8 px-4">
-      <h2 className="text-3xl font-semibold mb-6">Manage Users</h2>
-      <div className="overflow-x-auto">
-        <table className="table w-full border">
-          <thead>
-            <tr className="bg-gray-100">
-              <th>Name</th>
-              <th>Email</th>
-              <th>Role</th>
-              <th>Suspended</th>
-              <th>Actions</th>
+    <div className="max-w-7xl mx-auto px-4 py-6">
+      <h2 className="text-2xl font-semibold text-gray-500 mb-5">
+        Manage Users
+      </h2>
+
+      {/* Desktop Table */}
+      <div className="hidden md:block overflow-x-auto rounded-lg border border-gray-700 bg-gray-900">
+        <table className="w-full text-sm text-gray-300">
+          <thead className="bg-gray-800 text-gray-400">
+            <tr>
+              <th className="px-5 py-3 text-left">Name</th>
+              <th className="px-5 py-3 text-left">Email</th>
+              <th className="px-5 py-3 text-center">Role</th>
+              <th className="px-5 py-3 text-center">Status</th>
+              <th className="px-5 py-3 text-right">Actions</th>
             </tr>
           </thead>
+
           <tbody>
             {users.map((user) => (
-              <tr key={user._id}>
-                <td>{user.name}</td>
-                <td>{user.email}</td>
-                <td>{user.role}</td>
-                <td>{user.suspended ? "Yes" : "No"}</td>
-                <td className="space-x-2">
+              <tr
+                key={user._id}
+                className="border-t border-gray-800 hover:bg-gray-800/50"
+              >
+                <td className="px-5 py-3 text-gray-100">
+                  {user.name}
+                </td>
+                <td className="px-5 py-3">{user.email}</td>
+
+                <td className="px-5 py-3 text-center capitalize">
+                  {user.role}
+                </td>
+
+                <td className="px-5 py-3 text-center">
+                  {user.suspended ? (
+                    <span className="text-red-400 text-xs">Suspended</span>
+                  ) : (
+                    <span className="text-green-400 text-xs">Active</span>
+                  )}
+                </td>
+
+                <td className="px-5 py-3 text-right space-x-2">
                   <button
-                    className="btn btn-sm btn-info"
-                    onClick={() => handleRoleUpdate(user._id, user.role)}
+                    onClick={() =>
+                      handleRoleUpdate(user._id, user.role)
+                    }
+                    className="px-3 py-1.5 text-xs rounded border border-gray-600 hover:bg-gray-700"
                   >
                     Update Role
                   </button>
+
                   <button
-                    className={`btn btn-sm ${
-                      user.suspended ? "btn-success" : "btn-error"
-                    }`}
                     onClick={() => handleSuspend(user)}
+                    className="px-3 py-1.5 text-xs rounded border border-gray-600 hover:bg-gray-700"
                   >
                     {user.suspended ? "Unsuspend" : "Suspend"}
                   </button>
+
                   <button
-                    className="btn btn-sm btn-warning"
                     onClick={() => handleDelete(user._id)}
+                    className="px-3 py-1.5 text-xs rounded border border-gray-600 hover:bg-gray-700"
                   >
                     Delete
                   </button>
@@ -193,6 +200,49 @@ const ManageUsers = () => {
             ))}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile Cards */}
+      <div className="md:hidden space-y-3">
+        {users.map((user) => (
+          <div
+            key={user._id}
+            className="bg-gray-900 border border-gray-700 rounded-lg p-4 text-gray-300"
+          >
+            <h3 className="text-gray-100 font-medium">{user.name}</h3>
+            <p className="text-sm">{user.email}</p>
+
+            <div className="flex gap-3 mt-2 text-xs">
+              <span className="capitalize">{user.role}</span>
+              <span>
+                {user.suspended ? "Suspended" : "Active"}
+              </span>
+            </div>
+
+            <div className="flex gap-2 mt-3">
+              <button
+                onClick={() =>
+                  handleRoleUpdate(user._id, user.role)
+                }
+                className="flex-1 py-1.5 text-xs border border-gray-600 rounded"
+              >
+                Role
+              </button>
+              <button
+                onClick={() => handleSuspend(user)}
+                className="flex-1 py-1.5 text-xs border border-gray-600 rounded"
+              >
+                {user.suspended ? "Unsuspend" : "Suspend"}
+              </button>
+              <button
+                onClick={() => handleDelete(user._id)}
+                className="flex-1 py-1.5 text-xs border border-gray-600 rounded"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

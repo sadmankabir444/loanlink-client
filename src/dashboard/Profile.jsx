@@ -4,6 +4,7 @@ import useAxiosSecure from "../hooks/useAxiosSecure";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { FaUserCircle, FaEnvelope, FaUserTag } from "react-icons/fa";
 
+
 const Profile = () => {
   const { user } = useContext(AuthContext);
   const axiosSecure = useAxiosSecure();
