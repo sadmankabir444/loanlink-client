@@ -1,16 +1,41 @@
-# React + Vite
+# 💰 LoanLink – Loan Management Web Application
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## 🔍 Project Overview
+LoanLink is a web-based loan management application that helps users explore loan options and manage loan-related information easily.  
+The platform focuses on simplicity, clarity, and user-friendly interaction.
 
-Currently, two official plugins are available:
+## 🌐 Live Website
+https://dreamy-blancmange-7324a2.netlify.app/
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🛠️ Technologies Used
+- HTML  
+- CSS  
+- JavaScript  
+- React  
+- Firebase  
 
-## React Compiler
+## ✨ Core Features
+- User registration and login  
+- Loan information display  
+- Responsive and clean UI  
+- Secure authentication system  
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 📦 Dependencies
+- React Router  
+- Firebase  
+- Axios  
 
-## Expanding the ESLint configuration
+## 🖼️ Project Screenshot
+![LoanLink Screenshot](https://i.ibb.co.com/nqKw2hKH/Screenshot-2026-01-01-024143.png)
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## ⚙️ How to Run This Project Locally
+
+### Step 1: Clone the Repository
+```bash
+git clone https://github.com/sadmankabir444/loanlink
+
+Step 2: Install Dependencies
+npm install
+
+Step 3: Run the Project
+npm run dev
